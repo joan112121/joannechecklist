@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="每日清單">
+<meta name="theme-color" content="#ffffff">
+<title>每日清單</title>
+<style>
+:root{
+  --teal:#1D9E75;--teal-l:#E1F5EE;--teal-d:#085041;
+  --purple:#7F77DD;--purple-l:#EEEDFE;--purple-d:#3C3489;
+  --coral:#D85A30;--coral-l:#FAECE7;--coral-d:#712B13;
+  --amber:#BA7517;--amber-l:#FAEEDA;--amber-d:#633806;
+  --gray:#888780;--gray-l:#F1EFE8;--gray-d:#444441;
+  --bg:#F7F7F5;--card:#FFF;--border:rgba(0,0,0,0.09);
+  --text:#1a1a1a;--text2:#666;--text3:#aaa;
+  --r:14px;--rs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:90px;}
+.header{background:var(--card);padding:52px 20px 14px;border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100;}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.header-date{font-size:13px;color:var(--text2);}
+.header-title{font-size:22px;font-weight:700;}
+.reset-btn{font-size:12px;color:var(--coral);background:var(--coral-l);border:none;padding:5px 12px;border-radius:99px;cursor:pointer;font-weight:500;}
+.tabbar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:0.5px solid var(--border);display:flex;padding:8px 0 24px;z-index:200;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;}
+.tab-icon{font-size:19px;line-height:1;}
+.tab-label{font-size:10px;color:var(--text3);font-weight:500;}
+.tab-item.active .tab-label{color:var(--purple);}
+.page{display:none;padding:16px;}
+.page.active{display:block;}
+.card{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+.card-title{font-size:14px;font-weight:600;margin-bottom:12px;}
+.weight-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.weight-input{width:90px;padding:8px 12px;font-size:22px;font-weight:700;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--bg);color:var(--text);text-align:center;}
+.weight-status{font-size:13px;color:var(--text2);margin-bottom:8px;}
+.mini-bar-wrap{height:6px;background:var(--gray-l);border-radius:99px;overflow:hidden;margin-bottom:4px;}
+.mini-bar{height:6px;background:var(--teal);border-radius:99px;transition:width .4s;}
+.mini-bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);}
+.check-item{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:0.5px solid var(--border);}
+.check-item:last-child{border-bottom:none;padding-bottom:0;}
+.check-item:first-child{padding-top:0;}
+.circle{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+.circle.done{background:var(--teal);border-color:var(--teal);}
+.circle.done::after{content:'✓';color:#fff;font-size:13px;font-weight:700;}
+.ci{flex:1;}
+.cn{font-size:15px;color:var(--text);transition:color .2s;}
+.cn.done{color:var(--text3);text-decoration:line-through;}
+.ch{font-size:12px;color:var(--text3);margin-top:2px;}
+.cr{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.ni{width:62px;padding:5px 6px;font-size:13px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg);color:var(--text);text-align:center;}
+.nu{font-size:12px;color:var(--text3);}
+.prog-wrap{margin-top:12px;}
+.pb-bg{height:5px;background:var(--gray-l);border-radius:99px;overflow:hidden;margin-bottom:4px;}
+.pb{height:5px;border-radius:99px;transition:width .3s;}
+.pl{font-size:12px;color:var(--text3);}
+
+.protein-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);}
+.protein-row:last-of-type{border-bottom:none;}
+.protein-food{flex:1;border:none;background:transparent;font-size:14px;color:var(--text);font-family:inherit;outline:none;}
+.protein-food::placeholder{color:var(--text3);}
+.protein-gram{width:56px;padding:4px 6px;font-size:13px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg);color:var(--text);text-align:center;}
+.protein-result{font-size:12px;color:var(--teal);min-width:36px;text-align:right;font-weight:600;}
+.protein-del{font-size:16px;color:var(--text3);background:none;border:none;cursor:pointer;padding:0 4px;}
+.protein-total-bar{background:var(--teal-l);border-radius:var(--rs);padding:10px 14px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;}
+.protein-total-num{font-size:22px;font-weight:700;color:var(--teal);}
+.protein-total-label{font-size:12px;color:var(--teal-d);}
+
+.q-check-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border);}
+.q-check-item:last-child{border-bottom:none;}
+.q-circle{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+.q-circle.done{background:var(--amber);border-color:var(--amber);}
+.q-circle.done::after{content:'✓';color:#fff;font-size:12px;font-weight:700;}
+.q-check-label{font-size:13px;color:var(--text);flex:1;line-height:1.4;}
+.q-check-label.done{color:var(--text3);text-decoration:line-through;}
+
+.protein-add{font-size:13px;color:var(--purple);background:var(--purple-l);border:none;padding:6px 14px;border-radius:99px;cursor:pointer;font-weight:500;margin-top:8px;}
+
+.section-divider{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin:14px 0 0;padding-bottom:8px;border-bottom:0.5px solid var(--border);}
+.mood-row{display:flex;gap:8px;}
+.mood-btn{flex:1;font-size:23px;padding:9px 4px;border-radius:var(--rs);border:1.5px solid var(--border);background:transparent;cursor:pointer;transition:all .2s;}
+.mood-btn.selected{background:var(--purple-l);border-color:var(--purple);}
+.jbox{margin-bottom:12px;}
+.jlabel{font-size:13px;font-weight:600;margin-bottom:6px;}
+textarea{width:100%;min-height:68px;padding:10px 12px;font-size:14px;line-height:1.6;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;resize:none;}
+textarea:focus{outline:none;border-color:var(--purple);}
+textarea::placeholder{color:var(--text3);}
+.idea-card{border-radius:var(--r);padding:13px 16px;margin-bottom:12px;}
+.idea-label{font-size:13px;font-weight:600;margin-bottom:5px;}
+.idea-area{width:100%;min-height:56px;padding:6px 0;font-size:14px;line-height:1.6;border:none;background:transparent;font-family:inherit;resize:none;}
+.idea-area:focus{outline:none;}
+.idea-area::placeholder{opacity:.55;}
+.yt-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border);}
+.yt-item:last-child{border-bottom:none;}
+.yt-num{font-size:13px;font-weight:600;color:var(--text3);min-width:18px;}
+.yt-txt{flex:1;font-size:14px;border:none;background:transparent;color:var(--text);font-family:inherit;outline:none;min-width:0;}
+.yt-txt::placeholder{color:var(--text3);}
+.yt-chk{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.yt-chk.done{background:var(--purple);border-color:var(--purple);}
+.yt-chk.done::after{content:'✓';color:#fff;font-size:12px;font-weight:700;}
+.course-card{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+.course-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.course-name{font-size:14px;font-weight:600;}
+.course-meta{font-size:11px;color:var(--text3);margin-top:2px;}
+.course-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;flex-shrink:0;}
+.unit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:8px;}
+.unit-btn{padding:6px 4px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--bg);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;text-align:center;transition:all .2s;line-height:1.3;}
+.unit-btn.done{background:var(--purple-l);border-color:var(--purple);color:var(--purple-d);}
+.goal-item{padding:14px 0;border-bottom:0.5px solid var(--border);}
+.goal-item:last-child{border-bottom:none;padding-bottom:0;}
+.goal-item:first-child{padding-top:0;}
+.goal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.goal-name{font-size:14px;font-weight:600;}
+.goal-pct{font-size:14px;font-weight:700;}
+.goal-pb-bg{height:7px;background:var(--gray-l);border-radius:99px;overflow:hidden;margin-bottom:5px;}
+.goal-pb{height:7px;border-radius:99px;transition:width .5s;}
+.goal-detail{font-size:12px;color:var(--text3);}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.stat-box{background:var(--card);border-radius:var(--r);padding:13px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+.stat-label{font-size:11px;color:var(--text3);margin-bottom:3px;}
+.stat-value{font-size:20px;font-weight:700;}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4;}
+.chart-wrap{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+.chart-title{font-size:14px;font-weight:600;margin-bottom:3px;}
+.chart-sub{font-size:12px;color:var(--text3);margin-bottom:10px;}
+.hcard{background:var(--card);border-radius:var(--r);overflow:hidden;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+.hitem{padding:13px 16px;border-bottom:0.5px solid var(--border);}
+.htop{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.hdate{font-size:14px;font-weight:600;}
+.hbadges{display:flex;align-items:center;gap:6px;}
+.badge{font-size:11px;font-weight:600;padding:2px 9px;border-radius:99px;}
+.bg{background:var(--teal-l);color:var(--teal-d);}
+.bm{background:var(--amber-l);color:var(--amber-d);}
+.bl{background:var(--gray-l);color:var(--gray-d);}
+.hrow2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px;}
+.htag{font-size:12px;color:var(--text3);}
+.hdet{display:none;padding:12px 16px;background:var(--bg);border-top:0.5px solid var(--border);}
+.hdet.open{display:block;}
+.hactions{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:0.5px solid var(--border);background:var(--bg);}
+.del-btn{font-size:12px;color:var(--coral);background:var(--coral-l);border:none;padding:6px 14px;border-radius:99px;cursor:pointer;font-weight:500;}
+.expand-btn{font-size:12px;color:var(--purple);background:var(--purple-l);border:none;padding:6px 14px;border-radius:99px;cursor:pointer;font-weight:500;flex:1;}
+.ds{margin-bottom:9px;}.ds:last-child{margin-bottom:0;}
+.dl{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
+.dt{font-size:13px;color:var(--text);line-height:1.6;}
+.no-data{text-align:center;padding:30px 20px;color:var(--text3);font-size:14px;line-height:1.8;}
+.slabel{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin:16px 0 8px;}
+.export-bar{margin-bottom:12px;}
+.export-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:13px;border-radius:var(--r);border:none;font-size:14px;font-weight:600;cursor:pointer;background:var(--teal-l);color:var(--teal-d);}
+
+/* ── Custom Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal-sheet{background:var(--card);border-radius:20px 20px 0 0;padding:20px 20px 40px;width:100%;max-width:480px;transform:translateY(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);}
+.modal-overlay.show .modal-sheet{transform:translateY(0);}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:6px;text-align:center;}
+.modal-msg{font-size:14px;color:var(--text2);text-align:center;margin-bottom:20px;line-height:1.5;}
+.modal-btns{display:flex;flex-direction:column;gap:8px;}
+.modal-confirm{padding:14px;border-radius:var(--r);border:none;font-size:15px;font-weight:600;cursor:pointer;background:var(--coral);color:#fff;}
+.modal-cancel{padding:14px;border-radius:var(--r);border:none;font-size:15px;font-weight:600;cursor:pointer;background:var(--gray-l);color:var(--text);}
+</style>
+</head>
+<body>
+
+<!-- Custom Confirm Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-sheet">
+    <div class="modal-title" id="modal-title">確認刪除</div>
+    <div class="modal-msg" id="modal-msg"></div>
+    <div class="modal-btns">
+      <button class="modal-confirm" id="modal-confirm">確定刪除</button>
+      <button class="modal-cancel" onclick="closeModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-top">
+    <div><div class="header-date" id="hd"></div><div class="header-title">每日清單</div></div>
+    <button class="reset-btn" onclick="askReset()">重置今天</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button onclick="changeDate(-1)" style="font-size:13px;padding:4px 10px;border-radius:99px;border:0.5px solid var(--border);background:transparent;cursor:pointer;color:var(--text2);">← 前一天</button>
+    <span id="viewing-label" style="font-size:12px;color:var(--text2);flex:1;text-align:center;"></span>
+    <button id="next-btn" onclick="changeDate(1)" style="font-size:13px;padding:4px 10px;border-radius:99px;border:0.5px solid var(--border);background:transparent;cursor:pointer;color:var(--text2);visibility:hidden;">後一天 →</button>
+  </div>
+</div>
+
+<!-- 健康 -->
+<div class="page active" id="page-health">
+  <div class="card">
+    <div class="card-title">⚖️ 今日體重</div>
+    <div class="weight-row">
+      <input class="weight-input" type="number" id="wv" step="0.1" placeholder="45.0" inputmode="decimal" oninput="saveWeight()">
+      <span style="font-size:16px;color:var(--text2);">kg</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div class="weight-status" id="ws" style="margin:0;">目標 41kg，還差 — kg</div>
+      <button onclick="clearWeight()" style="font-size:11px;color:var(--text3);background:var(--gray-l);border:none;padding:3px 10px;border-radius:99px;cursor:pointer;">清除體重</button>
+    </div>
+    <div class="mini-bar-wrap"><div class="mini-bar" id="wb" style="width:0%"></div></div>
+    <div class="mini-bar-labels"><span>41kg 目標</span><span>45kg 起點</span></div>
+  </div>
+  <div class="card">
+    <div class="card-title">✅ 健康打勾</div>
+    <div class="section-divider" style="margin-top:0;">飲食與健康</div>
+    <div class="check-item" style="padding-top:10px;">
+      <div class="circle" id="c0" onclick="toggleCheck(0)"></div>
+      <div class="ci"><div class="cn" id="cn0">喝水 1200cc</div><div class="ch">800ml 瓶裝 x 1瓶 + 400ml</div></div>
+      <div class="cr"><input class="ni" type="number" id="a0" placeholder="實際" inputmode="numeric" onchange="saveActual(0)"><span class="nu">cc</span></div>
+    </div>
+    <div class="check-item" style="flex-wrap:wrap;">
+      <div class="circle" id="c1" onclick="toggleCheck(1)"></div>
+      <div class="ci"><div class="cn" id="cn1">蛋白質 60g 以上</div></div>
+      <div style="width:100%;margin-top:8px;" id="protein-calc-wrap">
+        <div id="protein-rows"></div>
+        <button class="protein-add" onclick="addProteinRow()">＋ 新增食物</button>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:0.5px solid var(--border);margin-top:4px;">
+          <span style="font-size:13px;color:var(--text2);flex:1;">手動補充蛋白質</span>
+          <input class="protein-gram" type="number" id="protein-manual" placeholder="0"
+            inputmode="numeric" value="" oninput="calcProteinTotal()" style="width:70px;" />
+          <span style="font-size:12px;color:var(--text3);">g</span>
+        </div>
+        <div class="protein-total-bar">
+          <div><div class="protein-total-label">今日蛋白質合計</div><div class="protein-total-num" id="protein-total">0 g</div></div>
+          <div style="font-size:12px;color:var(--teal-d);">目標 60g</div>
+        </div>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="circle" id="c2" onclick="toggleCheck(2)"></div>
+      <div class="ci"><div class="cn" id="cn2">熱量 1200 kcal 以內</div><div class="ch">早400 + 午500 + 晚300</div></div>
+      <div class="cr"><input class="ni" type="number" id="a2" placeholder="實際" inputmode="numeric" onchange="saveActual(2)"><span class="nu">kcal</span></div>
+    </div>
+    <div class="check-item">
+      <div class="circle" id="c3" onclick="toggleCheck(3)"></div>
+      <div class="ci"><div class="cn" id="cn3">晚上 8 點後不進食</div></div>
+      <div class="cr"></div>
+    </div>
+
+    <div class="section-divider">美妝自我保養</div>
+    <div class="check-item" style="padding-top:10px;">
+      <div class="circle" id="c4" onclick="toggleCheck(4)"></div>
+      <div class="ci"><div class="cn" id="cn4">臉部美容儀</div><div class="ch">每日使用</div></div>
+      <div class="cr"></div>
+    </div>
+    <div class="check-item">
+      <div class="circle" id="c5" onclick="toggleCheck(5)"></div>
+      <div class="ci"><div class="cn" id="cn5">手腳保養</div><div class="ch">乳液、護甲或足部保養</div></div>
+      <div class="cr"></div>
+    </div>
+    <div class="prog-wrap">
+      <div class="pb-bg"><div class="pb" id="hbar" style="width:0%;background:var(--teal)"></div></div>
+      <div class="pl" id="hprog">今天 0 / 7 項完成</div>
+    </div>
+  </div>
+</div>
+
+<!-- AI 學習 -->
+<div class="page" id="page-ai">
+  <div class="card">
+    <div class="card-title">📺 本週 AI 影片清單</div>
+    <div id="yt-list"></div>
+    <div class="prog-wrap">
+      <div class="pb-bg"><div class="pb" id="ytbar" style="width:0%;background:var(--purple)"></div></div>
+      <div class="pl" id="ytprog">本週 0 / 10 支看完</div>
+    </div>
+  </div>
+  <div class="course-card">
+    <div class="course-header">
+      <div><div class="course-name">AI Agent 零基礎打造個人工作流</div><div class="course-meta">15 個單元 ・ 每天 2 個 ・ 約 8 天完成</div></div>
+      <span class="course-badge" id="c1-badge" style="background:var(--purple-l);color:var(--purple-d);">0/15</span>
+    </div>
+    <div class="pb-bg" style="margin-bottom:10px;"><div class="pb" id="c1-bar" style="width:0%;background:var(--purple)"></div></div>
+    <div class="unit-grid" id="c1-units"></div>
+  </div>
+  <div class="course-card">
+    <div class="course-header">
+      <div><div class="course-name">百秒學AI｜專屬AI幼幼班必學入門課</div><div class="course-meta">7 個模組 ・ 每週 1 個 ・ 約 7 週完成</div></div>
+      <span class="course-badge" id="c2-badge" style="background:var(--teal-l);color:var(--teal-d);">0/7</span>
+    </div>
+    <div class="pb-bg" style="margin-bottom:10px;"><div class="pb" id="c2-bar" style="width:0%;background:var(--teal)"></div></div>
+    <div class="unit-grid" id="c2-units"></div>
+  </div>
+  <div class="idea-card" style="background:var(--purple-l);">
+    <div class="idea-label" style="color:var(--purple-d);">💡 今天的 AI 靈感</div>
+    <textarea class="idea-area" id="ai-idea" style="color:var(--purple-d);" placeholder="今天看到什麼 AI 工具或趨勢？一句話就好…" oninput="sf('ai-idea',VIEWING_DATE)"></textarea>
+  </div>
+</div>
+
+<!-- 自我成長 -->
+<div class="page" id="page-self">
+  <div class="card">
+    <div class="card-title">😊 今天心情</div>
+    <div class="mood-row">
+      <button class="mood-btn" onclick="setMood(1)">😔</button>
+      <button class="mood-btn" onclick="setMood(2)">😐</button>
+      <button class="mood-btn" onclick="setMood(3)">🙂</button>
+      <button class="mood-btn" onclick="setMood(4)">😊</button>
+    </div>
+  </div>
+  <div class="jbox"><div class="jlabel">☀️ 今天開心 / 感謝的事</div><textarea id="jh" placeholder="任何大小事都算，吃到好吃的也可以寫…" oninput="sf('jh',VIEWING_DATE)"></textarea></div>
+  <div class="jbox"><div class="jlabel">🌧️ 今天不開心的事</div><textarea id="js" placeholder="寫出來就是釋放，不用解決，只是記錄…" oninput="sf('js',VIEWING_DATE)"></textarea></div>
+  <div class="idea-card" style="background:var(--coral-l);">
+    <div class="idea-label" style="color:var(--coral-d);">🚀 今天的創業靈感</div>
+    <textarea class="idea-area" id="ji" style="color:var(--coral-d);" placeholder="一個感覺有機會的想法、痛點觀察，或一句「這個有趣」也行…" oninput="sf('ji',VIEWING_DATE)"></textarea>
+  </div>
+</div>
+
+<!-- 紀錄 -->
+<div class="page" id="page-history">
+  <div class="export-bar">
+    <button class="export-btn" onclick="exportCSV()">📥 匯出全部資料（CSV）</button>
+  </div>
+  <div class="card">
+    <div class="card-title">🏆 年度目標</div>
+    <div class="goal-item">
+      <div class="goal-top"><span class="goal-name">📅 連續紀錄 300 天</span><span class="goal-pct" id="g-streak-pct" style="color:var(--purple);">0%</span></div>
+      <div class="goal-pb-bg"><div class="goal-pb" id="g-streak-bar" style="width:0%;background:var(--purple)"></div></div>
+      <div class="goal-detail" id="g-streak-detail">目前連續 0 天 / 目標 300 天</div>
+    </div>
+    <div class="goal-item">
+      <div class="goal-top"><span class="goal-name">✅ 健康格子打勾 85%（2027/5/31前）</span><span class="goal-pct" id="g-health-pct" style="color:var(--teal);">0%</span></div>
+      <div class="goal-pb-bg"><div class="goal-pb" id="g-health-bar" style="width:0%;background:var(--teal)"></div></div>
+      <div class="goal-detail" id="g-health-detail">目前 0 / 0 格打勾（0%）</div>
+    </div>
+    <div class="goal-item">
+      <div class="goal-top"><span class="goal-name">😊 250 天 3-4 級心情（2027/5/31前）</span><span class="goal-pct" id="g-mood-pct" style="color:var(--amber);">0%</span></div>
+      <div class="goal-pb-bg"><div class="goal-pb" id="g-mood-bar" style="width:0%;background:var(--amber)"></div></div>
+      <div class="goal-detail" id="g-mood-detail">目前 0 天 / 目標 250 天</div>
+    </div>
+    <div class="goal-item">
+      <div class="goal-top"><span class="goal-name">⚖️ 達成 41kg</span><span class="goal-pct" id="g-weight-pct" style="color:var(--coral);">進行中</span></div>
+      <div class="goal-pb-bg"><div class="goal-pb" id="g-weight-bar" style="width:0%;background:var(--coral)"></div></div>
+      <div class="goal-detail" id="g-weight-detail">尚未記錄體重</div>
+    </div>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-box"><div class="stat-label">本週健康達成</div><div class="stat-value" id="s-health">—</div><div class="stat-sub">打勾完成率</div></div>
+    <div class="stat-box"><div class="stat-label">本週 AI 影片</div><div class="stat-value" id="s-ai">—</div><div class="stat-sub">看完支數</div></div>
+    <div class="stat-box"><div class="stat-label">心情趨勢</div><div class="stat-value" id="s-mood">—</div><div class="stat-sub" id="s-mood-sub">近7天 vs 前7天</div></div>
+    <div class="stat-box"><div class="stat-label">連續記錄</div><div class="stat-value" id="s-streak">—</div><div class="stat-sub">天</div></div>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-title">⚖️ 體重趨勢（近30天）</div>
+    <div class="chart-sub">虛線為 41kg 目標</div>
+    <svg id="wc" viewBox="0 0 300 90" style="width:100%;height:110px;"></svg>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-title">😊 心情趨勢（近30天）</div>
+    <div class="chart-sub" id="mood-trend-detail">記錄越多，趨勢越準確</div>
+    <svg id="mc" viewBox="0 0 300 80" style="width:100%;height:95px;"></svg>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:5px;"><span>😔 1</span><span>😐 2</span><span>🙂 3</span><span>😊 4</span></div>
+  </div>
+  <div class="slabel">課程進度</div>
+  <div id="course-hist"></div>
+  <div class="slabel">💰 季度理財 Check</div>
+  <div class="card">
+    <div style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;">理財執行</div>
+    <div class="q-check-item"><div class="q-circle" id="qc0" onclick="toggleQCheck(0)"></div><div class="q-check-label" id="qcl0">前往理財季報 Project 更新各帳戶數字（存款、0050、S&P500、購屋基金、旅遊基金）</div></div>
+    <div class="q-check-item"><div class="q-circle" id="qc1" onclick="toggleQCheck(1)"></div><div class="q-check-label" id="qcl1">確認投資定期定額有正常扣款</div></div>
+    <div class="q-check-item"><div class="q-circle" id="qc2" onclick="toggleQCheck(2)"></div><div class="q-check-label" id="qcl2">訂閱費用有無異常（Claude Pro、YT、iCloud、Gemini 年費）</div></div>
+    <div id="qcheck-progress" style="margin-top:10px;"></div>
+  </div>
+    <div class="slabel">每日紀錄</div>
+  <div id="day-hist"></div>
+</div>
+
+<div class="tabbar">
+  <div class="tab-item active" id="tab-health" onclick="switchTab('health')"><div class="tab-icon">❤️</div><div class="tab-label">健康</div></div>
+  <div class="tab-item" id="tab-ai" onclick="switchTab('ai')"><div class="tab-icon">🧠</div><div class="tab-label">AI 學習</div></div>
+  <div class="tab-item" id="tab-self" onclick="switchTab('self')"><div class="tab-icon">✨</div><div class="tab-label">自我成長</div></div>
+  <div class="tab-item" id="tab-history" onclick="switchTab('history')"><div class="tab-icon">📊</div><div class="tab-label">紀錄</div></div>
+</div>
+
+<script>
+// Use local date to avoid UTC midnight timezone shift (Taiwan UTC+8)
+const _now=new Date();
+const TODAY=_now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0')+'-'+String(_now.getDate()).padStart(2,'0');
+let VIEWING_DATE=TODAY;
+const WEEK=wkKey(new Date());
+const MJ=['','😔','😐','🙂','😊'];
+const TOTAL_CHECKS=6;
+const C1_UNITS=['緒論','1-1','1-2','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','3-5','3-6','4-1','4-2'];
+const C2_UNITS=['AI視覺平面設計','AI數字人自媒體','影像大師','影像大師 II','綜合影音製作','AI手機拍電影','七天破億流量密碼'];
+
+function wkKey(d){
+  const day=d.getDay()||7;
+  const m=new Date(d.getFullYear(),d.getMonth(),d.getDate()-day+1);
+  return 'wk-'+m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0');
+}
+function past(n){const a=[];for(let i=0;i<n;i++){const d=new Date();d.setDate(d.getDate()-i);a.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));}return a;}
+
+// Header date
+const dn=['日','一','二','三','四','五','六'],nn=new Date();
+document.getElementById('hd').textContent=nn.getFullYear()+' / '+(nn.getMonth()+1)+' / '+nn.getDate()+'（週'+dn[nn.getDay()]+'）';
+updateViewingLabel();
+
+// ── Custom Modal ──
+let _modalCb=null;
+function showModal(title,msg,cb){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-msg').textContent=msg;
+  _modalCb=cb;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+  _modalCb=null;
+}
+document.getElementById('modal-confirm').onclick=()=>{closeModal();if(_modalCb)_modalCb();};
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+function switchTab(t){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+t).classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='history') buildHistory();
+  if(t==='ai'){ buildYTList(); buildCourseUnits(); }
+}
+
+function toggleCheck(i){const k=VIEWING_DATE+'-c'+i;localStorage.setItem(k,localStorage.getItem(k)==='1'?'0':'1');renderChecks();}
+function renderChecks(){
+  let d=0;
+  for(let i=0;i<TOTAL_CHECKS;i++){const v=localStorage.getItem(VIEWING_DATE+'-c'+i)==='1';document.getElementById('c'+i).classList.toggle('done',v);document.getElementById('cn'+i).classList.toggle('done',v);if(v)d++;}
+  document.getElementById('hbar').style.width=Math.round(d/TOTAL_CHECKS*100)+'%';
+  document.getElementById('hprog').textContent='今天 '+d+' / '+TOTAL_CHECKS+' 項完成';
+}
+function saveActual(i){const e=document.getElementById('a'+i);if(e)localStorage.setItem(VIEWING_DATE+'-a'+i,e.value);}
+function loadActuals(){[0,1,2].forEach(i=>{const e=document.getElementById('a'+i);if(e)e.value=localStorage.getItem(VIEWING_DATE+'-a'+i)||'';});}
+
+function saveWeight(){
+  const v=parseFloat(document.getElementById('wv').value);
+  if(!isNaN(v) && v>=30 && v<=100){
+    localStorage.setItem(VIEWING_DATE+'-w',v);
+    document.getElementById('ws').textContent='目標 41kg，還差 '+Math.max(0,v-41).toFixed(1)+' kg';
+    document.getElementById('wb').style.width=Math.max(0,Math.min(100,Math.round((45-v)/4*100)))+'%';
+  }
+}
+function clearWeight(){
+  localStorage.removeItem(VIEWING_DATE+'-w');
+  document.getElementById('wv').value='';
+  document.getElementById('ws').textContent='目標 41kg，還差 — kg';
+  document.getElementById('wb').style.width='0%';
+}
+
+function loadWeight(){
+  const v=localStorage.getItem(VIEWING_DATE+'-w');
+  if(v){document.getElementById('wv').value=v;saveWeight();}
+  else{document.getElementById('wv').value='';document.getElementById('ws').textContent='目標 41kg，還差 — kg';document.getElementById('wb').style.width='0%';}
+}
+
+function buildYTList(){
+  const c=document.getElementById('yt-list');c.innerHTML='';
+  for(let i=0;i<10;i++){
+    const tx=localStorage.getItem('ytlink-'+i)||'';
+    const dn=localStorage.getItem(VIEWING_DATE+'-ytd'+i)==='1';
+    const d=document.createElement('div');d.className='yt-item';
+    d.innerHTML=`<span class="yt-num">${i+1}</span><input class="yt-txt" type="text" placeholder="貼上影片標題或連結..." value="${tx.replace(/"/g,'&quot;')}" oninput="localStorage.setItem('ytlink-'+${i},this.value)"><div class="yt-chk${dn?' done':''}" onclick="toggleYT(${i})"></div>`;
+    c.appendChild(d);
+  }
+  updYT();
+}
+function toggleYT(i){const k=VIEWING_DATE+'-ytd'+i;localStorage.setItem(k,localStorage.getItem(k)==='1'?'0':'1');buildYTList();}
+function updYT(){
+  const doneSet=new Set();
+  const weekDays=[];
+  const now=new Date();
+  const startOfWeek=now.getDay()||7;
+  for(let i=0;i<7;i++){
+    const wd=new Date(now.getFullYear(),now.getMonth(),now.getDate()-startOfWeek+1+i);
+    weekDays.push(wd.getFullYear()+'-'+String(wd.getMonth()+1).padStart(2,'0')+'-'+String(wd.getDate()).padStart(2,'0'));
+  }
+  weekDays.forEach(function(day){
+    for(let vi=0;vi<10;vi++){
+      if(localStorage.getItem(day+'-ytd'+vi)==='1') doneSet.add(vi);
+    }
+  });
+  const total=doneSet.size;
+  document.getElementById('ytbar').style.width=total*10+'%';
+  document.getElementById('ytprog').textContent='本週 '+total+' / 10 支看完';
+}
+function ytDoneForWk(wk){
+  // Get Monday date from week key
+  const wkDate=wk.replace('wk-','');
+  const doneSet=new Set();
+  for(let i=0;i<7;i++){
+    const base=new Date(wkDate+'T12:00:00');
+    base.setDate(base.getDate()+i);
+    const day=base.getFullYear()+'-'+String(base.getMonth()+1).padStart(2,'0')+'-'+String(base.getDate()).padStart(2,'0');
+    for(let vi=0;vi<10;vi++){
+      if(localStorage.getItem(day+'-ytd'+vi)==='1') doneSet.add(vi);
+    }
+  }
+  return doneSet.size;
+}
+
+function buildCourseUnits(){
+  const g1=document.getElementById('c1-units');g1.innerHTML='';let d1=0;
+  C1_UNITS.forEach((u,i)=>{
+    const done=localStorage.getItem(VIEWING_DATE+'-c1u'+i)==='1';if(done)d1++;
+    const b=document.createElement('button');b.className='unit-btn'+(done?' done':'');b.textContent=u;
+    b.onclick=()=>{const k=VIEWING_DATE+'-c1u'+i;localStorage.setItem(k,localStorage.getItem(k)==='1'?'0':'1');buildCourseUnits();};
+    g1.appendChild(b);
+  });
+  document.getElementById('c1-bar').style.width=Math.round(d1/C1_UNITS.length*100)+'%';
+  document.getElementById('c1-badge').textContent=d1+'/'+C1_UNITS.length;
+
+  const g2=document.getElementById('c2-units');g2.innerHTML='';let d2=0;
+  C2_UNITS.forEach((u,i)=>{
+    const done=localStorage.getItem(VIEWING_DATE+'-c2u'+i)==='1';if(done)d2++;
+    const b=document.createElement('button');b.className='unit-btn'+(done?' done':'');b.style.fontSize='11px';b.textContent=u;
+    b.onclick=()=>{const k=VIEWING_DATE+'-c2u'+i;localStorage.setItem(k,localStorage.getItem(k)==='1'?'0':'1');buildCourseUnits();};
+    g2.appendChild(b);
+  });
+  document.getElementById('c2-bar').style.width=Math.round(d2/C2_UNITS.length*100)+'%';
+  document.getElementById('c2-badge').textContent=d2+'/'+C2_UNITS.length;
+}
+
+function sf(id,pfx){const e=document.getElementById(id);if(e)localStorage.setItem((pfx===TODAY?VIEWING_DATE:pfx)+'-'+id,e.value||'');}
+function loadFields(){['jh','js','ji','ai-idea'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=localStorage.getItem(VIEWING_DATE+'-'+id)||'';});}
+function setMood(n){localStorage.setItem(VIEWING_DATE+'-mood',n);document.querySelectorAll('.mood-btn').forEach((b,i)=>b.classList.toggle('selected',i+1===n));}
+function loadMood(){
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+  const m=parseInt(localStorage.getItem(VIEWING_DATE+'-mood'));
+  if(m) document.querySelectorAll('.mood-btn').forEach((b,i)=>b.classList.toggle('selected',i+1===m));
+}
+
+function deleteDate(date){
+  for(let i=0;i<TOTAL_CHECKS;i++){localStorage.removeItem(date+'-c'+i);localStorage.removeItem(date+'-a'+i);}
+  ['w','mood','jh','js','ji','ai-idea'].forEach(k=>localStorage.removeItem(date+'-'+k));
+}
+
+function changeDate(delta) {
+  const [y,m,d] = VIEWING_DATE.split('-').map(Number);
+  const dt = new Date(y, m-1, d + delta); // local date arithmetic
+  const ny = dt.getFullYear();
+  const nm = String(dt.getMonth()+1).padStart(2,'0');
+  const nd = String(dt.getDate()).padStart(2,'0');
+  const newDate = ny+'-'+nm+'-'+nd;
+  if (newDate > TODAY) return;
+  VIEWING_DATE = newDate;
+  updateViewingLabel();
+  loadAll();
+}
+
+function updateViewingLabel() {
+  const label = document.getElementById('viewing-label');
+  const nextBtn = document.getElementById('next-btn');
+  const hdEl = document.getElementById('hd');
+  const dn2 = ['日','一','二','三','四','五','六'];
+  if (VIEWING_DATE === TODAY) {
+    label.textContent = '';
+    if (nextBtn) nextBtn.style.visibility = 'hidden';
+    // restore today's header
+    const nn2 = new Date();
+    if (hdEl) hdEl.textContent = nn2.getFullYear()+' / '+(nn2.getMonth()+1)+' / '+nn2.getDate()+'（週'+dn2[nn2.getDay()]+'）';
+  } else {
+    const [y,m,dd] = VIEWING_DATE.split('-');
+    // Use local date to get correct day of week
+    const vd = new Date(parseInt(y), parseInt(m)-1, parseInt(dd));
+    label.textContent = '';
+    if (hdEl) hdEl.textContent = y+' / '+parseInt(m)+' / '+parseInt(dd)+'（週'+dn2[vd.getDay()]+'）';
+    hdEl.style.color = 'var(--coral)';
+    if (nextBtn) nextBtn.style.visibility = 'visible';
+  }
+}
+
+function loadAll() {
+  const manualEl2=document.getElementById('protein-manual');
+  if(manualEl2) manualEl2.value='';
+  loadWeight();loadActuals();renderChecks();loadFields();loadMood();loadProteinRows();
+  if(manualEl2) manualEl2.value=localStorage.getItem(VIEWING_DATE+'-protein-manual')||'';
+  calcProteinTotal(false);
+  buildYTList();buildCourseUnits();
+}
+
+function askReset(){
+  const btn=document.querySelector('.reset-btn');
+  if(btn.dataset.confirm==='1'){
+    deleteDate(TODAY);
+    loadWeight();loadActuals();renderChecks();loadFields();loadMood();loadProteinRows();
+    btn.dataset.confirm='';
+    btn.style.background='';
+    btn.style.color='';
+    btn.textContent='✓ 已重置';
+    setTimeout(function(){ btn.textContent='重置今天'; }, 1500);
+  } else {
+    btn.dataset.confirm='1';
+    btn.textContent='確認重置？';
+    btn.style.background='var(--coral)';
+    btn.style.color='#fff';
+    setTimeout(()=>{
+      btn.dataset.confirm='';
+      btn.textContent='重置今天';
+      btn.style.background='';
+      btn.style.color='';
+    },3000);
+  }
+}
+
+function exportCSV(){
+  const allKeys=Object.keys(localStorage);
+  const dateSet=new Set();
+  allKeys.forEach(k=>{const m=k.match(/^(\d{4}-\d{2}-\d{2})-/);if(m)dateSet.add(m[1]);});
+  const sortedDates=[...dateSet].sort();
+  const headers=['日期','體重(kg)','健康完成項數','喝水達成','蛋白質達成','熱量達成','8點後不進食','步數達成','臉部美容儀','手腳保養','實際水量(cc)','實際蛋白質(g)','實際熱量(kcal)','實際步數','心情(1-5)','開心/感謝','不開心的事','創業靈感','AI靈感'];
+  const rows=[headers];
+  sortedDates.forEach(date=>{
+    const w=localStorage.getItem(date+'-w')||'';
+    const checks=[];for(let i=0;i<TOTAL_CHECKS;i++)checks.push(localStorage.getItem(date+'-c'+i)==='1'?'✓':'');
+    const done=checks.filter(x=>x==='✓').length;
+    const a0=localStorage.getItem(date+'-a0')||'';const a1=localStorage.getItem(date+'-a1')||'';
+    const a2=localStorage.getItem(date+'-a2')||'';const a4=localStorage.getItem(date+'-a4')||'';
+    const mood=localStorage.getItem(date+'-mood')||'';
+    const jh=(localStorage.getItem(date+'-jh')||'').replace(/"/g,'""');
+    const js=(localStorage.getItem(date+'-js')||'').replace(/"/g,'""');
+    const ji=(localStorage.getItem(date+'-ji')||'').replace(/"/g,'""');
+    const ai=(localStorage.getItem(date+'-ai-idea')||'').replace(/"/g,'""');
+    rows.push([date,w,done,...checks,a0,a1,a2,a4,mood,`"${jh}"`,`"${js}"`,`"${ji}"`,`"${ai}"`]);
+  });
+  const csv='\uFEFF'+rows.map(r=>r.join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='每日清單_'+TODAY+'.csv';a.click();
+  URL.revokeObjectURL(url);
+}
+
+function drawChart(svgId,data,color,minV,maxV,targetV,targetColor){
+  const svg=document.getElementById(svgId);svg.innerHTML='';
+  const W=280,H=72,PL=12,PT=8;
+  const pts=data.map((v,i)=>v===null?null:{x:PL+i/(data.length-1)*W,y:PT+H-(v-minV)/(maxV-minV)*H,v});
+  const valid=pts.filter(p=>p);
+  if(valid.length<2){svg.innerHTML='<text x="150" y="48" text-anchor="middle" fill="#bbb" font-size="12" font-family="-apple-system,sans-serif">記錄更多天後顯示圖表</text>';return;}
+  for(let i=0;i<=2;i++){const y=PT+H/2*i;const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',PL);l.setAttribute('x2',PL+W);l.setAttribute('y1',y);l.setAttribute('y2',y);l.setAttribute('stroke','#eee');l.setAttribute('stroke-width','1');svg.appendChild(l);}
+  if(targetV!==null&&targetV>=minV&&targetV<=maxV){const ty=PT+H-(targetV-minV)/(maxV-minV)*H;const tl=document.createElementNS('http://www.w3.org/2000/svg','line');tl.setAttribute('x1',PL);tl.setAttribute('x2',PL+W);tl.setAttribute('y1',ty);tl.setAttribute('y2',ty);tl.setAttribute('stroke',targetColor);tl.setAttribute('stroke-width','1.5');tl.setAttribute('stroke-dasharray','4,3');tl.setAttribute('opacity','0.6');svg.appendChild(tl);}
+  const poly=document.createElementNS('http://www.w3.org/2000/svg','polyline');poly.setAttribute('points',valid.map(p=>p.x+','+p.y).join(' '));poly.setAttribute('fill','none');poly.setAttribute('stroke',color);poly.setAttribute('stroke-width','2');poly.setAttribute('stroke-linejoin','round');svg.appendChild(poly);
+  valid.forEach(p=>{const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r','3');c.setAttribute('fill',color);svg.appendChild(c);});
+  [valid[0],valid[valid.length-1]].forEach((p,i)=>{const t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',p.x+(i===0?3:-3));t.setAttribute('y',p.y-5);t.setAttribute('fill',color);t.setAttribute('font-size','10');t.setAttribute('font-family','-apple-system,sans-serif');t.setAttribute('text-anchor',i===0?'start':'end');t.textContent=typeof p.v==='number'&&p.v%1!==0?p.v.toFixed(1):p.v;svg.appendChild(t);});
+}
+
+function buildHistory(){
+  const days365=past(365).reverse();const recent30=past(30).reverse();
+  // Collect all dates that have any data (handles both old UTC keys and new local keys)
+  const allStoredKeys=Object.keys(localStorage);
+  const allDatesWithData=new Set();
+  allStoredKeys.forEach(k=>{
+    const mm=k.match(/^(\d{4}-\d{2}-\d{2})-/);
+    if(mm) allDatesWithData.add(mm[1]);
+  });
+  // Also collect dates by scanning UTC equivalent of local dates (for backward compat)
+  let streak=0;
+  for(let i=0;i<365;i++){
+    const d=new Date();d.setDate(d.getDate()-i);
+    // Check local date
+    const localDt=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    // Check UTC date (old stored format)
+    const utcDt=d.toISOString().slice(0,10);
+    // Check previous UTC day too (covers midnight-8am Taiwan)
+    const dPrev=new Date(d);dPrev.setDate(dPrev.getDate()-1);
+    const utcPrevDt=dPrev.toISOString().slice(0,10);
+    if(allDatesWithData.has(localDt)||allDatesWithData.has(utcDt)||allDatesWithData.has(utcPrevDt)){
+      streak++;
+    } else {
+      break;
+    }
+  }
+  const sp=Math.min(100,Math.round(streak/300*100));
+  document.getElementById('g-streak-pct').textContent=streak>=300?'✅ 達成！':sp+'%';
+  document.getElementById('g-streak-pct').style.color=streak>=300?'var(--teal)':'var(--purple)';
+  document.getElementById('g-streak-bar').style.width=sp+'%';
+  document.getElementById('g-streak-detail').textContent='目前連續 '+streak+' 天 / 目標 300 天';
+  // Calculate average daily completion rate (only days with any data)
+  const allKeys=Object.keys(localStorage);
+  const dateSet2=new Set();
+  allKeys.forEach(k=>{const mm=k.match(/^(\d{4}-\d{2}-\d{2})-c\d+$/);if(mm)dateSet2.add(mm[1]);});
+  let dayRateSum=0, dayCount=0;
+  dateSet2.forEach(date=>{
+    let dayDone=0,dayTotal=TOTAL_CHECKS;
+    for(let j=0;j<TOTAL_CHECKS;j++){if(localStorage.getItem(date+'-c'+j)==='1')dayDone++;}
+    if(dayTotal>0){dayRateSum+=dayDone/dayTotal*100;dayCount++;}
+  });
+  const hr=dayCount?Math.round(dayRateSum/dayCount):0;
+  let tc=0,pc=0;
+  dateSet2.forEach(date=>{for(let j=0;j<TOTAL_CHECKS;j++){pc++;if(localStorage.getItem(date+'-c'+j)==='1')tc++;}});
+  const healthDeadline=new Date('2027-05-31');
+  const healthDaysLeft=Math.max(0,Math.ceil((healthDeadline-new Date())/(1000*60*60*24)));
+  document.getElementById('g-health-pct').textContent=hr+'%';
+  document.getElementById('g-health-bar').style.width=Math.min(100,hr)+'%';
+  document.getElementById('g-health-detail').textContent='每日平均達成率 '+hr+'%（'+dayCount+' 天記錄），截止 2027/5/31（還有 '+healthDaysLeft+' 天）';
+  const MOOD_TARGET_DATE='2027-05-31';
+  const today=new Date();
+  const deadline=new Date(MOOD_TARGET_DATE);
+  const daysLeft=Math.max(0,Math.ceil((deadline-today)/(1000*60*60*24)));
+  let happyDays=0;
+  // Count all days (not just past 365) that have mood >= 4
+  const allMoodKeys=Object.keys(localStorage).filter(k=>k.endsWith('-mood'));
+  allMoodKeys.forEach(k=>{const m=parseInt(localStorage.getItem(k));if(m>=3)happyDays++;});
+  const mp=Math.min(100,Math.round(happyDays/250*100));
+  document.getElementById('g-mood-pct').textContent=happyDays>=250?'✅ 達成！':mp+'%';
+  document.getElementById('g-mood-pct').style.color=happyDays>=250?'var(--teal)':'var(--amber)';
+  document.getElementById('g-mood-bar').style.width=mp+'%';
+  document.getElementById('g-mood-detail').textContent='目前 '+happyDays+' 天 / 目標 250 天，截止 2027/5/31（還有 '+daysLeft+' 天）';
+  let latestW=null;for(let i=0;i<365;i++){const d=new Date();d.setDate(d.getDate()-i);const dlw=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');const v=parseFloat(localStorage.getItem(dlw+'-w'));if(!isNaN(v)){latestW=v;break;}}
+  if(latestW){const wp=Math.min(100,Math.max(0,Math.round((45-latestW)/4*100)));document.getElementById('g-weight-bar').style.width=wp+'%';if(latestW<=41){document.getElementById('g-weight-pct').textContent='✅ 達成！';document.getElementById('g-weight-pct').style.color='var(--teal)';document.getElementById('g-weight-detail').textContent='目前 '+latestW+'kg，已達標！';}else{document.getElementById('g-weight-pct').textContent='進行中';document.getElementById('g-weight-detail').textContent='目前 '+latestW+'kg，還差 '+(latestW-41).toFixed(1)+'kg';}}
+  let wc=0,wp2=0;for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const dt=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');for(let j=0;j<TOTAL_CHECKS;j++){if(localStorage.getItem(dt+'-c'+j)!==null||dt===TODAY){wp2++;if(localStorage.getItem(dt+'-c'+j)==='1')wc++;}}}
+  document.getElementById('s-health').textContent=wp2?Math.round(wc/wp2*100)+'%':'—';
+  // Count this week's done videos using updYT logic
+  const saiDoneSet=new Set();
+  const saiNow=new Date();
+  const saiStart=saiNow.getDay()||7;
+  for(let i=0;i<7;i++){
+    const wd2=new Date(saiNow.getFullYear(),saiNow.getMonth(),saiNow.getDate()-saiStart+1+i);
+    const day2=wd2.getFullYear()+'-'+String(wd2.getMonth()+1).padStart(2,'0')+'-'+String(wd2.getDate()).padStart(2,'0');
+    for(let vi=0;vi<10;vi++){if(localStorage.getItem(day2+'-ytd'+vi)==='1')saiDoneSet.add(vi);}
+  }
+  document.getElementById('s-ai').textContent=saiDoneSet.size+'/10';
+  document.getElementById('s-streak').textContent=streak;
+  const m7=[],mp7=[];
+  for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const dt7=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');const m=parseInt(localStorage.getItem(dt7+'-mood'));if(m)m7.push(m);}
+  for(let i=7;i<14;i++){const d=new Date();d.setDate(d.getDate()-i);const dtp7=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');const m=parseInt(localStorage.getItem(dtp7+'-mood'));if(m)mp7.push(m);}
+  const avg7=m7.length?m7.reduce((a,b)=>a+b)/m7.length:null;const avgP=mp7.length?mp7.reduce((a,b)=>a+b)/mp7.length:null;
+  const mel=document.getElementById('s-mood');const msub=document.getElementById('s-mood-sub');
+  if(!avg7){mel.textContent='—';msub.textContent='還沒有記錄';}else if(!avgP){mel.textContent=avg7.toFixed(1);msub.textContent='近7天平均';}else{const diff=avg7-avgP;mel.textContent=diff>0.3?'↑ 好轉':diff<-0.3?'↓ 下滑':'→ 穩定';mel.style.color=diff>0.3?'var(--teal)':diff<-0.3?'var(--coral)':'var(--amber)';msub.textContent='近7天 '+avg7.toFixed(1)+' vs 前7天 '+avgP.toFixed(1);}
+  if(avg7&&avgP){const diff=avg7-avgP;document.getElementById('mood-trend-detail').textContent=diff>0.3?`近7天平均 ${avg7.toFixed(1)}，比上週好轉 ↑`:diff<-0.3?`近7天平均 ${avg7.toFixed(1)}，比上週下滑 ↓`:`近7天平均 ${avg7.toFixed(1)}，與上週相近`;}
+  const wdata=recent30.map(d=>parseFloat(localStorage.getItem(d+'-w'))||null);const vw=wdata.filter(x=>x!==null);
+  drawChart('wc',wdata,'#7F77DD',vw.length?Math.min(...vw)-0.5:40,vw.length?Math.max(...vw)+0.5:46,41,'#1D9E75');
+  drawChart('mc',recent30.map(d=>parseInt(localStorage.getItem(d+'-mood'))||null),'#D85A30',1,5,null,null);
+  // Count course units done across all days
+  const allKeys2=Object.keys(localStorage);
+  const c1done=allKeys2.filter(k=>/-c1u\d+$/.test(k)&&localStorage.getItem(k)==='1').length;
+    const c2done=allKeys2.filter(k=>/-c2u\d+$/.test(k)&&localStorage.getItem(k)==='1').length;
+  document.getElementById('course-hist').innerHTML=`<div class="hcard"><div style="padding:14px 16px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-size:13px;font-weight:600;">AI Agent 個人工作流</span><span class="badge ${c1done>=15?'bg':c1done>0?'bm':'bl'}">${c1done}/15 完成</span></div><div class="pb-bg"><div class="pb" style="width:${Math.round(c1done/15*100)}%;background:var(--purple);"></div></div><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;font-weight:600;">百秒學AI入門課</span><span class="badge ${c2done>=7?'bg':c2done>0?'bm':'bl'}">${c2done}/7 完成</span></div><div class="pb-bg" style="margin-top:8px;"><div class="pb" style="width:${Math.round(c2done/7*100)}%;background:var(--teal);"></div></div></div></div>`;
+
+  const dh=document.getElementById('day-hist');dh.innerHTML='';let hasD=false;
+  past(365).forEach(date=>{
+    let any=!!localStorage.getItem(date+'-w')||!!localStorage.getItem(date+'-mood');
+    for(let i=0;i<TOTAL_CHECKS;i++)if(localStorage.getItem(date+'-c'+i)!==null)any=true;
+    if(!any)return;hasD=true;
+    let done=0;for(let i=0;i<TOTAL_CHECKS;i++)if(localStorage.getItem(date+'-c'+i)==='1')done++;
+    const w=localStorage.getItem(date+'-w')||'';const mood=parseInt(localStorage.getItem(date+'-mood'))||0;
+    const jh=localStorage.getItem(date+'-jh')||'';const js=localStorage.getItem(date+'-js')||'';
+    const ji=localStorage.getItem(date+'-ji')||'';const ai=localStorage.getItem(date+'-ai-idea')||'';
+    const [,m,d2]=date.split('-');const sc=done>=6?'bg':done>=3?'bm':'bl';const hasDetail=jh||js||ji||ai;
+    const wrap=document.createElement('div');wrap.className='hcard';
+    const item=document.createElement('div');item.className='hitem';
+    item.innerHTML=`<div class="htop"><span class="hdate">${parseInt(m)}/${parseInt(d2)}${date===TODAY?' 今天':''}</span><div class="hbadges">${mood?`<span style="font-size:18px;">${MJ[mood]}</span>`:''}<span class="badge ${sc}">${done}/${TOTAL_CHECKS}</span></div></div><div class="hrow2">${w?`<span class="htag">⚖️ ${w}kg</span>`:''}${ai?`<span class="htag">💡 AI靈感</span>`:''}${ji?`<span class="htag">🚀 創業靈感</span>`:''}${jh||js?`<span class="htag">📝 日記</span>`:''}</div>`;
+    const det=document.createElement('div');det.className='hdet';
+    det.innerHTML=[jh?`<div class="ds"><div class="dl">☀️ 開心/感謝</div><div class="dt">${jh}</div></div>`:'',js?`<div class="ds"><div class="dl">🌧️ 不開心</div><div class="dt">${js}</div></div>`:'',ji?`<div class="ds"><div class="dl">🚀 創業靈感</div><div class="dt">${ji}</div></div>`:'',ai?`<div class="ds"><div class="dl">💡 AI 靈感</div><div class="dt">${ai}</div></div>`:''  ].join('');
+    const actions=document.createElement('div');actions.className='hactions';
+    if(hasDetail){
+      const eb=document.createElement('button');eb.className='expand-btn';eb.textContent='查看日記';
+      eb.onclick=()=>{det.classList.toggle('open');eb.textContent=det.classList.contains('open')?'收起':'查看日記';};
+      actions.appendChild(eb);
+    }
+    const db=document.createElement('button');db.className='del-btn';db.textContent='刪除此天';
+    let delTimer=null;
+    db.onclick=()=>{
+      if(db.dataset.confirm==='1'){
+        clearTimeout(delTimer);
+        deleteDate(date);
+        buildHistory();
+      } else {
+        db.dataset.confirm='1';
+        db.textContent='確認刪除？';
+        db.style.background='var(--coral)';
+        db.style.color='#fff';
+        delTimer=setTimeout(()=>{
+          db.dataset.confirm='';
+          db.textContent='刪除此天';
+          db.style.background='';
+          db.style.color='';
+        },3000);
+      }
+    };
+    actions.appendChild(db);
+    wrap.appendChild(item);if(hasDetail)wrap.appendChild(det);wrap.appendChild(actions);
+    dh.appendChild(wrap);
+  });
+  if(!hasD)dh.innerHTML='<div class="no-data">還沒有每日紀錄<br>開始記錄後就會出現在這裡 📝</div>';
+}
+
+
+// ── Protein Calculator ──
+const PROTEIN_DB = {
+  '雞胸肉':31,'雞腿肉':18,'豬里肌':22,'牛肉':26,'鮭魚':20,'鯛魚':19,'蝦':18,
+  '雞蛋':6,'水煮蛋':6,'蛋白':4,'豆腐':8,'嫩豆腐':5,'毛豆':11,'豆漿':3,
+  '希臘優格':10,'優格':4,'牛奶':3,'起司':25,'茅屋起司':12,
+  '燕麥':13,'糙米':3,'白飯':3,'吐司':8,'全麥吐司':9,
+  '花生醬':25,'杏仁':21,'腰果':18,'鷹嘴豆':9,
+  '豬肉':21,'雞翅':27,'培根':37,'火腿':16
+};
+
+// egg keywords that use "顆" unit
+const EGG_KEYWORDS = ['雞蛋','水煮蛋','蛋','荷包蛋','茶葉蛋'];
+const EGG_PROTEIN_PER = 6; // grams per egg
+
+function isEggFood(food) {
+  return EGG_KEYWORDS.some(k => food.includes(k));
+}
+
+function getProteinPer100g(food) {
+  food = food.trim();
+  for (const key of Object.keys(PROTEIN_DB)) {
+    if (food.includes(key) || key.includes(food)) return PROTEIN_DB[key];
+  }
+  return null;
+}
+
+let proteinRows = [];
+
+function loadProteinRows() {
+  try {
+    proteinRows = JSON.parse(localStorage.getItem(VIEWING_DATE+'-protein-rows') || '[]');
+  } catch(e) { proteinRows = []; }
+  renderProteinRows();
+  const manualEl = document.getElementById('protein-manual');
+  if (manualEl) {
+    manualEl.value = localStorage.getItem(VIEWING_DATE+'-protein-manual') || '';
+  }
+}
+
+function saveProteinRows() {
+  localStorage.setItem(VIEWING_DATE+'-protein-rows', JSON.stringify(proteinRows));
+}
+
+function addProteinRow(food='', gram='') {
+  proteinRows.push({food, gram});
+  saveProteinRows();
+  renderProteinRows();
+}
+
+function updateProteinRow(i, field, val) {
+  proteinRows[i][field] = val;
+  saveProteinRows();
+  calcProteinTotal();
+}
+
+function deleteProteinRow(i) {
+  proteinRows.splice(i, 1);
+  saveProteinRows();
+  renderProteinRows();
+}
+
+function renderProteinRows() {
+  const wrap = document.getElementById('protein-rows');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  if (proteinRows.length === 0) {
+    wrap.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:6px 0;">輸入食物名稱和克數，自動計算蛋白質</div>';
+  }
+  proteinRows.forEach((row, i) => {
+    const per100 = getProteinPer100g(row.food);
+    const calc = (per100 && row.gram) ? ((per100 * parseFloat(row.gram)) / 100).toFixed(1) : '?';
+    const d = document.createElement('div');
+    d.className = 'protein-row';
+    const isEgg = isEggFood(row.food);
+    const unit = isEgg ? '顆' : 'g';
+    const eggCalc = (isEgg && row.gram) ? (EGG_PROTEIN_PER * parseFloat(row.gram)).toFixed(1) : null;
+    const displayCalc = isEgg ? (eggCalc ? eggCalc+'g' : '?') : (calc === '?' ? '?' : calc+'g');
+    d.innerHTML = `
+      <input class="protein-food" placeholder="雞胸肉、雞蛋…" value="${row.food}"
+        oninput="updateProteinRow(${i},'food',this.value)" onblur="renderProteinRows()" />
+      <input class="protein-gram" type="number" placeholder="${unit}" value="${row.gram}"
+        inputmode="numeric" oninput="updateProteinRow(${i},'gram',this.value);calcProteinTotal()" />
+      <span style="font-size:12px;color:var(--text3);min-width:16px;">${unit}</span>
+      <span class="protein-result">${displayCalc}</span>
+      <button class="protein-del" onclick="deleteProteinRow(${i})">✕</button>
+    `;
+    wrap.appendChild(d);
+  });
+  calcProteinTotal();
+}
+
+function calcProteinTotal(save=true) {
+  let total = 0;
+  proteinRows.forEach(row => {
+    if (!row.gram) return;
+    if (isEggFood(row.food)) {
+      total += EGG_PROTEIN_PER * parseFloat(row.gram);
+    } else {
+      const per100 = getProteinPer100g(row.food);
+      if (per100) total += (per100 * parseFloat(row.gram)) / 100;
+    }
+  });
+  const manual = parseFloat(document.getElementById('protein-manual')?.value) || 0;
+  total += manual;
+  const el = document.getElementById('protein-total');
+  if (el) {
+    el.textContent = total.toFixed(1) + ' g';
+    el.style.color = total >= 60 ? '#1D9E75' : '#D85A30';
+  }
+  // save total to actual
+  if(save){
+    localStorage.setItem(VIEWING_DATE+'-a1', total.toFixed(1));
+    localStorage.setItem(VIEWING_DATE+'-protein-manual', manual);
+  }
+}
+
+// ── Quarterly Checklist ──
+const QCHECK_KEYS = ['qc0','qc1','qc2'];
+function toggleQCheck(i) {
+  const k = 'qcheck-'+i;
+  const current = localStorage.getItem(k) === '1';
+  localStorage.setItem(k, current ? '0' : '1');
+  renderQChecks();
+}
+function renderQChecks() {
+  let done_count = 0;
+  QCHECK_KEYS.forEach((id, i) => {
+    const done = localStorage.getItem('qcheck-'+i) === '1';
+    const circle = document.getElementById(id);
+    const label = document.getElementById('qcl'+i);
+    if (circle) circle.classList.toggle('done', done);
+    if (label) label.classList.toggle('done', done);
+    if (done) done_count++;
+  });
+  const prog = document.getElementById('qcheck-progress');
+  if (prog) {
+    const pct = Math.round(done_count / QCHECK_KEYS.length * 100);
+    prog.innerHTML = '<div style="height:5px;background:var(--gray-l);border-radius:99px;overflow:hidden;margin-bottom:4px;"><div style="height:5px;border-radius:99px;background:'+(pct===100?'var(--teal)':'var(--amber)')+';width:'+pct+'%;transition:width .3s;"></div></div><div style="font-size:12px;color:var(--text3);">本季完成 '+done_count+' / '+QCHECK_KEYS.length+' 項（'+pct+'%）'+(pct===100?' ✅':'')+'</div>';
+  }
+}
+
+loadWeight();loadActuals();renderChecks();buildYTList();buildCourseUnits();loadFields();loadMood();loadProteinRows();renderQChecks();
+</script>
+</body>
+</html>
