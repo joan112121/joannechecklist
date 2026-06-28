@@ -252,6 +252,12 @@ textarea::placeholder{color:var(--text3);}
       <div class="ci"><div class="cn" id="cn5">手腳保養</div><div class="ch">乳液、護甲或足部保養</div></div>
       <div class="cr"></div>
     </div>
+    <div class="section-divider">運動</div>
+    <div class="check-item" style="padding-top:10px;">
+      <div class="circle" id="c6" onclick="toggleCheck(6)"></div>
+      <div class="ci"><div class="cn" id="cn6">30 分鐘運動 或 1 萬步</div><div class="ch" id="exercise-week-hint">本週 0 / 3 天達成</div></div>
+      <div class="cr"></div>
+    </div>
     <div class="prog-wrap">
       <div class="pb-bg"><div class="pb" id="hbar" style="width:0%;background:var(--teal)"></div></div>
       <div class="pl" id="hprog">今天 0 / 7 項完成</div>
@@ -262,28 +268,12 @@ textarea::placeholder{color:var(--text3);}
 <!-- AI 學習 -->
 <div class="page" id="page-ai">
   <div class="card">
-    <div class="card-title">📺 本週 AI 影片清單</div>
+    <div class="card-title">📚 本週學習進度計劃</div>
     <div id="yt-list"></div>
     <div class="prog-wrap">
       <div class="pb-bg"><div class="pb" id="ytbar" style="width:0%;background:var(--purple)"></div></div>
       <div class="pl" id="ytprog">本週 0 / 10 支看完</div>
     </div>
-  </div>
-  <div class="course-card">
-    <div class="course-header">
-      <div><div class="course-name">AI Agent 零基礎打造個人工作流</div><div class="course-meta">15 個單元 ・ 每天 2 個 ・ 約 8 天完成</div></div>
-      <span class="course-badge" id="c1-badge" style="background:var(--purple-l);color:var(--purple-d);">0/15</span>
-    </div>
-    <div class="pb-bg" style="margin-bottom:10px;"><div class="pb" id="c1-bar" style="width:0%;background:var(--purple)"></div></div>
-    <div class="unit-grid" id="c1-units"></div>
-  </div>
-  <div class="course-card">
-    <div class="course-header">
-      <div><div class="course-name">百秒學AI｜專屬AI幼幼班必學入門課</div><div class="course-meta">7 個模組 ・ 每週 1 個 ・ 約 7 週完成</div></div>
-      <span class="course-badge" id="c2-badge" style="background:var(--teal-l);color:var(--teal-d);">0/7</span>
-    </div>
-    <div class="pb-bg" style="margin-bottom:10px;"><div class="pb" id="c2-bar" style="width:0%;background:var(--teal)"></div></div>
-    <div class="unit-grid" id="c2-units"></div>
   </div>
   <div class="idea-card" style="background:var(--purple-l);">
     <div class="idea-label" style="color:var(--purple-d);">💡 今天的 AI 靈感</div>
@@ -299,7 +289,6 @@ textarea::placeholder{color:var(--text3);}
       <button class="mood-btn" onclick="setMood(1)">😔</button>
       <button class="mood-btn" onclick="setMood(2)">😐</button>
       <button class="mood-btn" onclick="setMood(3)">🙂</button>
-      <button class="mood-btn" onclick="setMood(4)">😊</button>
     </div>
   </div>
   <div class="jbox"><div class="jlabel">☀️ 今天開心 / 感謝的事</div><textarea id="jh" placeholder="任何大小事都算，吃到好吃的也可以寫…" oninput="sf('jh',VIEWING_DATE)"></textarea></div>
@@ -328,7 +317,7 @@ textarea::placeholder{color:var(--text3);}
       <div class="goal-detail" id="g-health-detail">目前 0 / 0 格打勾（0%）</div>
     </div>
     <div class="goal-item">
-      <div class="goal-top"><span class="goal-name">😊 250 天 3-4 級心情（2027/5/31前）</span><span class="goal-pct" id="g-mood-pct" style="color:var(--amber);">0%</span></div>
+      <div class="goal-top"><span class="goal-name">😊 250 天 3 級心情（2027/5/31前）</span><span class="goal-pct" id="g-mood-pct" style="color:var(--amber);">0%</span></div>
       <div class="goal-pb-bg"><div class="goal-pb" id="g-mood-bar" style="width:0%;background:var(--amber)"></div></div>
       <div class="goal-detail" id="g-mood-detail">目前 0 天 / 目標 250 天</div>
     </div>
@@ -353,10 +342,9 @@ textarea::placeholder{color:var(--text3);}
     <div class="chart-title">😊 心情趨勢（近30天）</div>
     <div class="chart-sub" id="mood-trend-detail">記錄越多，趨勢越準確</div>
     <svg id="mc" viewBox="0 0 300 80" style="width:100%;height:95px;"></svg>
-    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:5px;"><span>😔 1</span><span>😐 2</span><span>🙂 3</span><span>😊 4</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:5px;"><span>😔 1</span><span>😐 2</span><span>🙂 3</span></div>
   </div>
-  <div class="slabel">課程進度</div>
-  <div id="course-hist"></div>
+
   <div class="slabel">💰 季度理財 Check</div>
   <div class="card">
     <div style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;">理財執行</div>
@@ -382,10 +370,9 @@ const _now=new Date();
 const TODAY=_now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0')+'-'+String(_now.getDate()).padStart(2,'0');
 let VIEWING_DATE=TODAY;
 const WEEK=wkKey(new Date());
-const MJ=['','😔','😐','🙂','😊'];
-const TOTAL_CHECKS=6;
-const C1_UNITS=['緒論','1-1','1-2','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','3-5','3-6','4-1','4-2'];
-const C2_UNITS=['AI視覺平面設計','AI數字人自媒體','影像大師','影像大師 II','綜合影音製作','AI手機拍電影','七天破億流量密碼'];
+const MJ=['','😔','😐','🙂'];
+const TOTAL_CHECKS=7;
+
 
 function wkKey(d){
   const day=d.getDay()||7;
@@ -420,15 +407,32 @@ function switchTab(t){
   document.getElementById('page-'+t).classList.add('active');
   document.getElementById('tab-'+t).classList.add('active');
   if(t==='history') buildHistory();
-  if(t==='ai'){ buildYTList(); buildCourseUnits(); }
+  if(t==='ai'){ buildYTList(); }
 }
 
 function toggleCheck(i){const k=VIEWING_DATE+'-c'+i;localStorage.setItem(k,localStorage.getItem(k)==='1'?'0':'1');renderChecks();}
+function updateExerciseWeekHint(){
+  const hint=document.getElementById('exercise-week-hint');
+  if(!hint) return;
+  const now=new Date();
+  const startOfWeek=now.getDay()||7;
+  let weekCount=0;
+  for(let i=0;i<7;i++){
+    const wd=new Date(now.getFullYear(),now.getMonth(),now.getDate()-startOfWeek+1+i);
+    const day=wd.getFullYear()+'-'+String(wd.getMonth()+1).padStart(2,'0')+'-'+String(wd.getDate()).padStart(2,'0');
+    if(localStorage.getItem(day+'-c6')==='1') weekCount++;
+  }
+  const color=weekCount>=3?'var(--teal)':'var(--text3)';
+  hint.textContent='本週 '+weekCount+' / 3 天達成';
+  hint.style.color=color;
+}
+
 function renderChecks(){
   let d=0;
   for(let i=0;i<TOTAL_CHECKS;i++){const v=localStorage.getItem(VIEWING_DATE+'-c'+i)==='1';document.getElementById('c'+i).classList.toggle('done',v);document.getElementById('cn'+i).classList.toggle('done',v);if(v)d++;}
   document.getElementById('hbar').style.width=Math.round(d/TOTAL_CHECKS*100)+'%';
   document.getElementById('hprog').textContent='今天 '+d+' / '+TOTAL_CHECKS+' 項完成';
+  updateExerciseWeekHint();
 }
 function saveActual(i){const e=document.getElementById('a'+i);if(e)localStorage.setItem(VIEWING_DATE+'-a'+i,e.value);}
 function loadActuals(){[0,1,2].forEach(i=>{const e=document.getElementById('a'+i);if(e)e.value=localStorage.getItem(VIEWING_DATE+'-a'+i)||'';});}
@@ -499,27 +503,6 @@ function ytDoneForWk(wk){
   return doneSet.size;
 }
 
-function buildCourseUnits(){
-  const g1=document.getElementById('c1-units');g1.innerHTML='';let d1=0;
-  C1_UNITS.forEach((u,i)=>{
-    const done=localStorage.getItem(VIEWING_DATE+'-c1u'+i)==='1';if(done)d1++;
-    const b=document.createElement('button');b.className='unit-btn'+(done?' done':'');b.textContent=u;
-    b.onclick=()=>{const k=VIEWING_DATE+'-c1u'+i;localStorage.setItem(k,localStorage.getItem(k)==='1'?'0':'1');buildCourseUnits();};
-    g1.appendChild(b);
-  });
-  document.getElementById('c1-bar').style.width=Math.round(d1/C1_UNITS.length*100)+'%';
-  document.getElementById('c1-badge').textContent=d1+'/'+C1_UNITS.length;
-
-  const g2=document.getElementById('c2-units');g2.innerHTML='';let d2=0;
-  C2_UNITS.forEach((u,i)=>{
-    const done=localStorage.getItem(VIEWING_DATE+'-c2u'+i)==='1';if(done)d2++;
-    const b=document.createElement('button');b.className='unit-btn'+(done?' done':'');b.style.fontSize='11px';b.textContent=u;
-    b.onclick=()=>{const k=VIEWING_DATE+'-c2u'+i;localStorage.setItem(k,localStorage.getItem(k)==='1'?'0':'1');buildCourseUnits();};
-    g2.appendChild(b);
-  });
-  document.getElementById('c2-bar').style.width=Math.round(d2/C2_UNITS.length*100)+'%';
-  document.getElementById('c2-badge').textContent=d2+'/'+C2_UNITS.length;
-}
 
 function sf(id,pfx){const e=document.getElementById(id);if(e)localStorage.setItem((pfx===TODAY?VIEWING_DATE:pfx)+'-'+id,e.value||'');}
 function loadFields(){['jh','js','ji','ai-idea'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=localStorage.getItem(VIEWING_DATE+'-'+id)||'';});}
@@ -576,7 +559,7 @@ function loadAll() {
   loadWeight();loadActuals();renderChecks();loadFields();loadMood();loadProteinRows();
   if(manualEl2) manualEl2.value=localStorage.getItem(VIEWING_DATE+'-protein-manual')||'';
   calcProteinTotal(false);
-  buildYTList();buildCourseUnits();
+  buildYTList();
 }
 
 function askReset(){
@@ -730,12 +713,7 @@ function buildHistory(){
   const wdata=recent30.map(d=>parseFloat(localStorage.getItem(d+'-w'))||null);const vw=wdata.filter(x=>x!==null);
   drawChart('wc',wdata,'#7F77DD',vw.length?Math.min(...vw)-0.5:40,vw.length?Math.max(...vw)+0.5:46,41,'#1D9E75');
   drawChart('mc',recent30.map(d=>parseInt(localStorage.getItem(d+'-mood'))||null),'#D85A30',1,5,null,null);
-  // Count course units done across all days
-  const allKeys2=Object.keys(localStorage);
-  const c1done=allKeys2.filter(k=>/-c1u\d+$/.test(k)&&localStorage.getItem(k)==='1').length;
-    const c2done=allKeys2.filter(k=>/-c2u\d+$/.test(k)&&localStorage.getItem(k)==='1').length;
-  document.getElementById('course-hist').innerHTML=`<div class="hcard"><div style="padding:14px 16px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-size:13px;font-weight:600;">AI Agent 個人工作流</span><span class="badge ${c1done>=15?'bg':c1done>0?'bm':'bl'}">${c1done}/15 完成</span></div><div class="pb-bg"><div class="pb" style="width:${Math.round(c1done/15*100)}%;background:var(--purple);"></div></div><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;font-weight:600;">百秒學AI入門課</span><span class="badge ${c2done>=7?'bg':c2done>0?'bm':'bl'}">${c2done}/7 完成</span></div><div class="pb-bg" style="margin-top:8px;"><div class="pb" style="width:${Math.round(c2done/7*100)}%;background:var(--teal);"></div></div></div></div>`;
-
+  
   const dh=document.getElementById('day-hist');dh.innerHTML='';let hasD=false;
   past(365).forEach(date=>{
     let any=!!localStorage.getItem(date+'-w')||!!localStorage.getItem(date+'-mood');
@@ -926,7 +904,7 @@ function renderQChecks() {
   }
 }
 
-loadWeight();loadActuals();renderChecks();buildYTList();buildCourseUnits();loadFields();loadMood();loadProteinRows();renderQChecks();
+loadWeight();loadActuals();renderChecks();buildYTList();loadFields();loadMood();loadProteinRows();renderQChecks();
 </script>
 </body>
 </html>
