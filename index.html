@@ -237,7 +237,12 @@ textarea::placeholder{color:var(--text3);}
     </div>
     <div class="check-item">
       <div class="circle" id="c3" onclick="toggleCheck(3)"></div>
-      <div class="ci"><div class="cn" id="cn3">晚上 8 點後不進食</div></div>
+      <div class="ci"><div class="cn" id="cn3">晚上 8 點後不進食</div><div class="ch" id="fast-week-hint">本週 0 / 2 天達成</div></div>
+      <div class="cr"></div>
+    </div>
+    <div class="check-item">
+      <div class="circle" id="c7" onclick="toggleCheck(7)"></div>
+      <div class="ci"><div class="cn" id="cn7">拒絕罪惡美食誘惑</div><div class="ch" id="temptation-week-hint">本週 0 / 5 次達成</div><div class="ch">例如：拒絕同事揪團喝手搖飲、下午茶甜點（喝了/吃了就不算成功）</div></div>
       <div class="cr"></div>
     </div>
 
@@ -371,7 +376,7 @@ const TODAY=_now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0')+'-'
 let VIEWING_DATE=TODAY;
 const WEEK=wkKey(new Date());
 const MJ=['','😔','😐','🙂'];
-const TOTAL_CHECKS=7;
+const TOTAL_CHECKS=8;
 
 
 function wkKey(d){
@@ -427,12 +432,29 @@ function updateExerciseWeekHint(){
   hint.style.color=color;
 }
 
+function updateWeekHint(elId,checkIndex,target,unit){
+  const hint=document.getElementById(elId);
+  if(!hint) return;
+  const now=new Date();
+  const startOfWeek=now.getDay()||7;
+  let weekCount=0;
+  for(let i=0;i<7;i++){
+    const wd=new Date(now.getFullYear(),now.getMonth(),now.getDate()-startOfWeek+1+i);
+    const day=wd.getFullYear()+'-'+String(wd.getMonth()+1).padStart(2,'0')+'-'+String(wd.getDate()).padStart(2,'0');
+    if(localStorage.getItem(day+'-c'+checkIndex)==='1') weekCount++;
+  }
+  const color=weekCount>=target?'var(--teal)':'var(--text3)';
+  hint.textContent='本週 '+weekCount+' / '+target+' '+unit+'達成';
+  hint.style.color=color;
+}
 function renderChecks(){
   let d=0;
   for(let i=0;i<TOTAL_CHECKS;i++){const v=localStorage.getItem(VIEWING_DATE+'-c'+i)==='1';document.getElementById('c'+i).classList.toggle('done',v);document.getElementById('cn'+i).classList.toggle('done',v);if(v)d++;}
   document.getElementById('hbar').style.width=Math.round(d/TOTAL_CHECKS*100)+'%';
   document.getElementById('hprog').textContent='今天 '+d+' / '+TOTAL_CHECKS+' 項完成';
   updateExerciseWeekHint();
+  updateWeekHint('fast-week-hint',3,2,'天');
+  updateWeekHint('temptation-week-hint',7,5,'次');
 }
 function saveActual(i){const e=document.getElementById('a'+i);if(e)localStorage.setItem(VIEWING_DATE+'-a'+i,e.value);}
 function loadActuals(){[0,1,2].forEach(i=>{const e=document.getElementById('a'+i);if(e)e.value=localStorage.getItem(VIEWING_DATE+'-a'+i)||'';});}
@@ -591,7 +613,7 @@ function exportCSV(){
   const dateSet=new Set();
   allKeys.forEach(k=>{const m=k.match(/^(\d{4}-\d{2}-\d{2})-/);if(m)dateSet.add(m[1]);});
   const sortedDates=[...dateSet].sort();
-  const headers=['日期','體重(kg)','健康完成項數','喝水達成','蛋白質達成','熱量達成','8點後不進食','步數達成','臉部美容儀','手腳保養','實際水量(cc)','實際蛋白質(g)','實際熱量(kcal)','實際步數','心情(1-5)','開心/感謝','不開心的事','創業靈感','AI靈感'];
+  const headers=['日期','體重(kg)','健康完成項數','喝水達成','蛋白質達成','熱量達成','8點後不進食','步數達成','臉部美容儀','手腳保養','拒絕美食誘惑','實際水量(cc)','實際蛋白質(g)','實際熱量(kcal)','實際步數','心情(1-5)','開心/感謝','不開心的事','創業靈感','AI靈感'];
   const rows=[headers];
   sortedDates.forEach(date=>{
     const w=localStorage.getItem(date+'-w')||'';
