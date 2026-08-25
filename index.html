@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="2026紀錄">
+<meta name="theme-color" content="#F7F7F5">
+<title>2026 個人紀錄</title>
+<style>
+:root{
+  --teal:#1D9E75;--teal-l:#E1F5EE;--teal-d:#085041;
+  --purple:#7F77DD;--purple-l:#EEEDFE;--purple-d:#3C3489;
+  --coral:#D85A30;--coral-l:#FAECE7;--coral-d:#712B13;
+  --amber:#BA7517;--amber-l:#FAEEDA;--amber-d:#633806;
+  --gray:#888780;--gray-l:#F1EFE8;--gray-d:#444441;
+  --bg:#F7F7F5;--card:#FFF;--border:rgba(0,0,0,0.09);
+  --text:#1a1a1a;--text2:#666;--text3:#aaa;
+  --r:14px;--rs:8px;
+  --serif:Georgia,'Noto Serif TC',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{overscroll-behavior-y:none;}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:88px;}
+button{font-family:inherit;}
+
+/* ---------- header ---------- */
+.header{background:var(--card);padding:50px 20px 16px;border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100;}
+.header-row{display:flex;justify-content:space-between;align-items:flex-end;}
+.header-date{font-size:13px;color:var(--text2);font-weight:500;}
+.header-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.ghost-num{font-family:var(--serif);font-size:44px;font-weight:400;color:var(--teal);opacity:.85;line-height:1;letter-spacing:-1px;}
+.ghost-label{font-size:10px;color:var(--text3);text-align:right;margin-top:2px;letter-spacing:.04em;text-transform:uppercase;}
+
+/* ---------- layout ---------- */
+.wrap{max-width:520px;margin:0 auto;padding:16px 16px 8px;}
+.card{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:12px;border:0.5px solid var(--border);}
+.sec-title{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.hr{border:none;border-top:0.5px solid var(--border);margin:14px 0;}
+
+/* ---------- quick buttons ---------- */
+.seg{display:flex;gap:8px;}
+.seg-btn{flex:1;padding:12px 6px;border-radius:var(--rs);border:1.3px solid var(--border);background:var(--bg);color:var(--text2);font-size:14px;font-weight:600;text-align:center;cursor:pointer;transition:all .15s;}
+.seg-btn.on-good{background:var(--teal-l);border-color:var(--teal);color:var(--teal-d);}
+.seg-btn.on-mid{background:var(--amber-l);border-color:var(--amber);color:var(--amber-d);}
+.seg-btn.on-bad{background:var(--coral-l);border-color:var(--coral);color:var(--coral-d);}
+.seg-btn.on-teal{background:var(--teal-l);border-color:var(--teal);color:var(--teal-d);}
+
+.row-label{font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px;}
+.row-label .opt{font-size:11px;color:var(--text3);font-weight:400;margin-left:4px;}
+
+.note-area{width:100%;min-height:52px;padding:9px 11px;font-size:13.5px;line-height:1.6;border-radius:var(--rs);border:1.3px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;resize:none;margin-top:8px;display:none;}
+.note-area.show{display:block;}
+.note-area::placeholder{color:var(--text3);}
+
+.weight-row{display:flex;align-items:baseline;gap:10px;}
+.weight-input{width:100px;padding:9px 10px;font-size:24px;font-weight:700;border-radius:var(--rs);border:1.3px solid var(--border);background:var(--bg);color:var(--text);text-align:center;}
+.weight-gap{font-size:12.5px;color:var(--text2);}
+
+.check-row{display:flex;align-items:center;gap:12px;padding:10px 0;}
+.check-row:not(:last-child){border-bottom:0.5px solid var(--border);}
+.dot{width:24px;height:24px;border-radius:50%;border:1.6px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;transition:all .15s;}
+.dot.on{background:var(--teal);border-color:var(--teal);color:#fff;}
+.check-text{flex:1;font-size:14.5px;}
+.check-text.done{color:var(--text3);text-decoration:line-through;}
+.steps-input{width:68px;padding:6px 6px;font-size:13px;border-radius:var(--rs);border:1.3px solid var(--border);background:var(--bg);color:var(--text);text-align:center;}
+.steps-hint{font-size:11px;color:var(--text3);}
+.steps-hint.ok{color:var(--teal);}
+
+.idea-row{display:flex;gap:8px;margin-bottom:10px;}
+.idea-input{flex:1;padding:10px 12px;font-size:13.5px;border-radius:var(--rs);border:1.3px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;}
+.idea-add{width:40px;border-radius:var(--rs);border:none;background:var(--teal);color:#fff;font-size:18px;font-weight:600;cursor:pointer;}
+.idea-item{font-size:13px;color:var(--text2);padding:8px 0;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;gap:8px;}
+.idea-item:last-child{border-bottom:none;}
+.idea-del{color:var(--text3);cursor:pointer;font-size:15px;flex-shrink:0;}
+.idea-empty{font-size:12.5px;color:var(--text3);padding:6px 0;}
+
+/* ---------- weekly ---------- */
+.week-range{font-size:12px;color:var(--text3);margin-bottom:12px;}
+.week-item{display:flex;gap:10px;align-items:center;padding:9px 0;}
+.week-item:not(:last-child){border-bottom:0.5px solid var(--border);}
+.week-title{flex:1;padding:8px 10px;font-size:13.5px;border-radius:var(--rs);border:1.3px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;}
+.week-progress{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.week-progress-num{font-family:var(--serif);font-size:30px;color:var(--teal);}
+
+/* ---------- goals ---------- */
+.goal-item{margin-bottom:16px;}
+.goal-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.goal-name{font-size:13.5px;font-weight:600;}
+.goal-val{font-size:12.5px;color:var(--text2);}
+.goal-val b{color:var(--teal);font-size:14px;}
+.goal-bar-bg{height:7px;background:var(--gray-l);border-radius:99px;overflow:hidden;}
+.goal-bar{height:100%;background:var(--teal);border-radius:99px;transition:width .4s;}
+.goal-note{font-size:11px;color:var(--text3);margin-top:4px;}
+.month-table{width:100%;border-collapse:collapse;margin-top:8px;}
+.month-table td{font-size:12.5px;padding:6px 4px;border-bottom:0.5px solid var(--border);color:var(--text2);}
+.month-table td:first-child{color:var(--text3);}
+.month-table td.hit{color:var(--teal);font-weight:700;}
+
+/* ---------- history ---------- */
+.hist-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border);}
+.hist-item:last-child{border-bottom:none;}
+.hist-date{font-size:12px;color:var(--text3);width:50px;flex-shrink:0;}
+.hist-icons{font-size:13px;letter-spacing:2px;flex:1;}
+.hist-w{font-size:12px;color:var(--text2);}
+
+/* ---------- settings ---------- */
+.field{margin-bottom:14px;}
+.field label{font-size:12.5px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px;}
+.field input[type=text],.field input[type=number],.field input[type=url]{width:100%;padding:10px 12px;font-size:13.5px;border-radius:var(--rs);border:1.3px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;}
+.field-small{display:flex;gap:8px;align-items:center;}
+.field-small input{width:70px !important;}
+.btn{padding:11px 16px;border-radius:var(--rs);border:none;background:var(--teal);color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;width:100%;}
+.btn.ghost{background:var(--bg);color:var(--text);border:1.3px solid var(--border);}
+.btn-row{display:flex;gap:8px;margin-top:6px;}
+.status-line{font-size:12px;color:var(--text3);margin-top:8px;display:flex;justify-content:space-between;}
+.status-ok{color:var(--teal);}
+.status-bad{color:var(--coral);}
+.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;font-size:12.5px;padding:9px 16px;border-radius:99px;opacity:0;transition:all .25s;pointer-events:none;z-index:999;}
+.toast.show{opacity:.92;transform:translateX(-50%) translateY(0);}
+
+/* ---------- day switch ---------- */
+.day-switch{display:flex;gap:8px;margin-bottom:14px;}
+.day-switch-btn{flex:1;text-align:center;padding:10px 6px;border-radius:var(--rs);border:1.3px solid var(--border);background:var(--card);color:var(--text2);font-size:13.5px;font-weight:600;cursor:pointer;}
+.day-switch-btn.on{background:var(--teal);border-color:var(--teal);color:#fff;}
+.backfill-note{font-size:11.5px;color:var(--amber-d);background:var(--amber-l);padding:8px 10px;border-radius:var(--rs);margin-bottom:14px;display:none;}
+.backfill-note.show{display:block;}
+
+/* ---------- toggle switch ---------- */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;}
+.toggle-row:not(:last-child){border-bottom:0.5px solid var(--border);}
+.toggle-name{font-size:13.5px;}
+.switch{position:relative;width:42px;height:24px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;cursor:pointer;inset:0;background:var(--gray-l);border-radius:99px;transition:.15s;}
+.slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+.switch input:checked + .slider{background:var(--teal);}
+.switch input:checked + .slider:before{transform:translateX(18px);}
+
+.custom-item-row{display:flex;align-items:center;gap:8px;padding:10px 0;}
+.custom-item-row:not(:last-child){border-bottom:0.5px solid var(--border);}
+.custom-item-name{flex:1;font-size:13.5px;}
+.custom-item-target{width:52px;padding:5px 4px;font-size:12px;border-radius:var(--rs);border:1.3px solid var(--border);background:var(--bg);color:var(--text);text-align:center;}
+.custom-item-target-label{font-size:11px;color:var(--text3);}
+.custom-item-del{color:var(--text3);cursor:pointer;font-size:16px;padding:0 2px;}
+
+.tabbar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:0.5px solid var(--border);display:flex;padding:6px 0 20px;z-index:100;}
+.tab{flex:1;text-align:center;color:var(--text3);cursor:pointer;padding:6px 0;}
+.tab.active{color:var(--teal);}
+.tab-ic{font-size:19px;display:block;}
+.tab-label{font-size:10px;margin-top:2px;font-weight:600;}
+.page{display:none;}
+.page.active{display:block;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-row">
+    <div>
+      <div class="header-date" id="hdrDate">—</div>
+      <div class="header-sub" id="hdrSub">—</div>
+    </div>
+    <div>
+      <div class="ghost-num" id="hdrNum">000</div>
+      <div class="ghost-label">今年已記錄</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ===== TODAY ===== -->
+<div class="page active" id="page-today">
+
+  <div class="day-switch" id="daySwitch">
+    <div class="day-switch-btn on" data-d="today" onclick="switchDay('today')">今天</div>
+    <div class="day-switch-btn" data-d="yesterday" onclick="switchDay('yesterday')">補昨天</div>
+  </div>
+  <div class="backfill-note" id="backfillNote">正在補記昨天的紀錄，儲存後會標記為「補記」</div>
+
+  <div class="card" id="card-weight">
+    <div class="sec-title">體重</div>
+    <div class="weight-row">
+      <input type="number" step="0.1" class="weight-input" id="inWeight" placeholder="0.0">
+      <div class="weight-gap" id="weightGap">尚未設定目標</div>
+    </div>
+  </div>
+
+  <div class="card" id="card-mood">
+    <div class="row-label">今天心情 <span class="opt">可寫幾句，非必填</span></div>
+    <div class="seg" id="moodSeg">
+      <div class="seg-btn" data-v="bad" onclick="setMood('bad')">😔 壞</div>
+      <div class="seg-btn" data-v="mid" onclick="setMood('mid')">😐 中</div>
+      <div class="seg-btn" data-v="good" onclick="setMood('good')">🙂 好</div>
+    </div>
+    <textarea class="note-area" id="moodNote" placeholder="今天發生了什麼..." oninput="saveDay()"></textarea>
+  </div>
+
+  <div class="card" id="card-water">
+    <div class="row-label">今天喝水了嗎 <span class="opt">目標 1200cc</span></div>
+    <div class="seg" id="waterSeg">
+      <div class="seg-btn" data-v="yes" onclick="setWater('yes')">✅ 有</div>
+      <div class="seg-btn" data-v="no" onclick="setWater('no')">⚠️ 沒有</div>
+    </div>
+  </div>
+
+  <div class="card" id="card-protein">
+    <div class="row-label">今天蛋白質吃夠了嗎</div>
+    <div class="seg" id="proteinSeg">
+      <div class="seg-btn" data-v="enough" onclick="setProtein('enough')">✅ 足夠</div>
+      <div class="seg-btn" data-v="low" onclick="setProtein('low')">⚠️ 不足</div>
+    </div>
+    <textarea class="note-area" id="proteinNote" placeholder="今天吃了多少、吃了什麼..." oninput="saveDay()"></textarea>
+  </div>
+
+  <div class="card" id="card-exercise">
+    <div class="row-label">今天運動了嗎</div>
+    <div class="seg" id="exSeg">
+      <div class="seg-btn" data-v="none" onclick="setExType('none')">沒有</div>
+      <div class="seg-btn" data-v="walk" onclick="setExType('walk')">🚶 走路</div>
+      <div class="seg-btn" data-v="other" onclick="setExType('other')">🏃 其他運動</div>
+    </div>
+    <div id="stepsWrap" style="display:none;margin-top:10px;display:flex;align-items:center;gap:10px;">
+      <input type="number" class="steps-input" id="inSteps" placeholder="步數" oninput="onStepsChange()">
+      <span class="steps-hint" id="stepsHint">達 8000 步才算達成</span>
+    </div>
+  </div>
+
+  <div class="card" id="card-legbeauty">
+    <div class="check-row" id="row-leg">
+      <div class="dot" id="dotLeg" onclick="toggleSimple('leg')">✓</div>
+      <div class="check-text" id="txtLeg">腿部運動（抬腿100下）</div>
+    </div>
+    <div class="check-row" id="row-beauty">
+      <div class="dot" id="dotBeauty" onclick="toggleSimple('beauty')">✓</div>
+      <div class="check-text" id="txtBeauty">有用美容儀</div>
+    </div>
+  </div>
+
+  <div class="card" id="card-custom" style="display:none;">
+    <div class="sec-title">自訂項目</div>
+    <div id="customTodayList"></div>
+  </div>
+
+  <div class="card" id="card-ideas">
+    <div class="sec-title">靈感隨手記</div>
+    <div class="idea-row">
+      <input type="text" class="idea-input" id="ideaInput" placeholder="隨時想到什麼都可以記一下" onkeydown="if(event.key==='Enter')addIdea()">
+      <button class="idea-add" onclick="addIdea()">+</button>
+    </div>
+    <div id="ideaList"></div>
+  </div>
+
+</div>
+
+<!-- ===== WEEKLY ===== -->
+<div class="page" id="page-week">
+  <div class="card" id="card-weekex">
+    <div class="sec-title">本週運動天數</div>
+    <div class="week-progress">
+      <div><span class="week-progress-num" id="weekExNum">0</span><span style="font-size:13px;color:var(--text3);"> / 3 天</span></div>
+      <div class="week-range" id="weekExRange" style="margin:0;"></div>
+    </div>
+    <div class="goal-bar-bg"><div class="goal-bar" id="weekExBar" style="width:0%;"></div></div>
+    <div class="goal-note">走路要當天達 8000 步才算一天</div>
+  </div>
+
+  <div class="card" id="card-weekread">
+    <div class="sec-title">本週書 / 影片（3 項）</div>
+    <div class="week-range" id="weekRange"></div>
+    <div id="weekReadList"></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">這週的小進步</div>
+    <div class="goal-note" style="margin:0 0 8px;">不一定要寫，單純記錄讓自己開心、有成就感的地方</div>
+    <textarea class="note-area show" id="weekReflection" placeholder="這週有什麼小進步、小成就，或是開心的事..." oninput="saveWeekReflection()"></textarea>
+  </div>
+</div>
+
+<!-- ===== GOALS ===== -->
+<div class="page" id="page-goals">
+  <div class="card">
+    <div class="sec-title">2026 年度進度</div>
+    <div class="goal-item">
+      <div class="goal-top"><div class="goal-name">累積記錄天數</div><div class="goal-val"><b id="gDaysCur">0</b> / <span id="gDaysTarget">100</span></div></div>
+      <div class="goal-bar-bg"><div class="goal-bar" id="gDaysBar" style="width:0%"></div></div>
+    </div>
+    <div class="goal-item" id="goalrow-water">
+      <div class="goal-top"><div class="goal-name">喝水達標天數</div><div class="goal-val"><b id="gWaterCur">0</b> / <span id="gWaterTarget">100</span></div></div>
+      <div class="goal-bar-bg"><div class="goal-bar" id="gWaterBar" style="width:0%"></div></div>
+    </div>
+    <div class="goal-item" id="goalrow-mood">
+      <div class="goal-top"><div class="goal-name">好／中心情天數</div><div class="goal-val"><b id="gMoodCur">0</b> / <span id="gMoodTarget">80</span></div></div>
+      <div class="goal-bar-bg"><div class="goal-bar" id="gMoodBar" style="width:0%"></div></div>
+    </div>
+    <div class="goal-item" id="goalrow-protein">
+      <div class="goal-top"><div class="goal-name">蛋白質達標天數</div><div class="goal-val"><b id="gProCur">0</b> / <span id="gProTarget">100</span></div></div>
+      <div class="goal-bar-bg"><div class="goal-bar" id="gProBar" style="width:0%"></div></div>
+    </div>
+    <div class="goal-item" id="goalrow-exercise">
+      <div class="goal-top"><div class="goal-name">運動達成週數</div><div class="goal-val"><b id="gExCur">0</b> / <span id="gExTarget">10</span></div></div>
+      <div class="goal-bar-bg"><div class="goal-bar" id="gExBar" style="width:0%"></div></div>
+    </div>
+    <div class="goal-item" id="goalrow-weekread">
+      <div class="goal-top"><div class="goal-name">書／影片達成週數</div><div class="goal-val"><b id="gReadCur">0</b> / <span id="gReadTarget">15</span></div></div>
+      <div class="goal-bar-bg"><div class="goal-bar" id="gReadBar" style="width:0%"></div></div>
+    </div>
+    <div class="goal-item" id="goalrow-leg">
+      <div class="goal-top"><div class="goal-name">腿部運動天數</div><div class="goal-val"><b id="gLegCur">0</b> / <span id="gLegTarget">100</span></div></div>
+      <div class="goal-bar-bg"><div class="goal-bar" id="gLegBar" style="width:0%"></div></div>
+    </div>
+    <div class="goal-item" id="goalrow-beauty">
+      <div class="goal-top"><div class="goal-name">美容儀天數</div><div class="goal-val"><b id="gBeautyCur">0</b> / <span id="gBeautyTarget">120</span></div></div>
+      <div class="goal-bar-bg"><div class="goal-bar" id="gBeautyBar" style="width:0%"></div></div>
+    </div>
+    <div id="goalrow-weight">
+      <div class="hr"></div>
+      <div class="goal-name" style="margin-bottom:6px;">體重月checkpoint（目標 <span id="gWeightFinal">41</span> kg）</div>
+      <table class="month-table" id="monthTable"></table>
+    </div>
+  </div>
+
+  <div class="card" id="card-customgoals" style="display:none;">
+    <div class="sec-title">自訂目標</div>
+    <div id="customGoalsList"></div>
+  </div>
+
+  <div class="card">    <div class="sec-title">最近記錄</div>
+    <div id="histList"></div>
+  </div>
+</div>
+
+<!-- ===== SETTINGS ===== -->
+<div class="page" id="page-settings">
+  <div class="card">
+    <div class="sec-title">Google 試算表同步</div>
+    <div class="field">
+      <label>試算表網址（Apps Script 部署網址）</label>
+      <input type="url" id="inSheetUrl" placeholder="https://script.google.com/macros/s/.../exec" oninput="saveSheetUrl()">
+    </div>
+    <div class="btn-row">
+      <button class="btn ghost" onclick="testConnection()">測試連線</button>
+      <button class="btn" onclick="flushQueue(true)">立即同步</button>
+    </div>
+    <div class="status-line"><span id="syncStatus">尚未連線</span><span id="queueStatus"></span></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">年度目標設定</div>
+    <div class="field field-small"><label style="flex:1;margin:0;">體重最終目標 (kg)</label><input type="number" step="0.1" id="tWeight" oninput="saveGoals()"></div>
+    <div class="hr"></div>
+    <div class="field field-small"><label style="flex:1;margin:0;">9月體重目標</label><input type="number" step="0.1" id="tW9" oninput="saveGoals()"></div>
+    <div class="field field-small"><label style="flex:1;margin:0;">10月體重目標</label><input type="number" step="0.1" id="tW10" oninput="saveGoals()"></div>
+    <div class="field field-small"><label style="flex:1;margin:0;">12月體重目標</label><input type="number" step="0.1" id="tW12" oninput="saveGoals()"></div>
+    <div class="hr"></div>
+    <div class="field field-small"><label style="flex:1;margin:0;">累積記錄天數目標</label><input type="number" id="tDays" oninput="saveGoals()"></div>
+    <div class="field field-small"><label style="flex:1;margin:0;">喝水達標天數目標</label><input type="number" id="tWater" oninput="saveGoals()"></div>
+    <div class="field field-small"><label style="flex:1;margin:0;">好/中心情天數目標</label><input type="number" id="tMood" oninput="saveGoals()"></div>
+    <div class="field field-small"><label style="flex:1;margin:0;">蛋白質達標天數目標</label><input type="number" id="tProtein" oninput="saveGoals()"></div>
+    <div class="field field-small"><label style="flex:1;margin:0;">運動達成週數目標</label><input type="number" id="tExWeeks" oninput="saveGoals()"></div>
+    <div class="field field-small"><label style="flex:1;margin:0;">書/影片達成週數目標</label><input type="number" id="tReadWeeks" oninput="saveGoals()"></div>
+    <div class="field field-small"><label style="flex:1;margin:0;">腿部運動天數目標</label><input type="number" id="tLeg" oninput="saveGoals()"></div>
+    <div class="field field-small"><label style="flex:1;margin:0;">美容儀天數目標</label><input type="number" id="tBeauty" oninput="saveGoals()"></div>
+    <div class="goal-note">改這裡的數字馬上生效，之前累積的記錄不會被清掉或中斷。</div>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">顯示項目管理</div>
+    <div class="goal-note" style="margin:0 0 8px;">關掉的項目不會出現在「今日」畫面，過去的紀錄不會被刪除，隨時可以再打開</div>
+    <div class="toggle-row"><div class="toggle-name">體重</div><label class="switch"><input type="checkbox" id="vis-weight" onchange="saveVisibility()"><span class="slider"></span></label></div>
+    <div class="toggle-row"><div class="toggle-name">喝水</div><label class="switch"><input type="checkbox" id="vis-water" onchange="saveVisibility()"><span class="slider"></span></label></div>
+    <div class="toggle-row"><div class="toggle-name">心情</div><label class="switch"><input type="checkbox" id="vis-mood" onchange="saveVisibility()"><span class="slider"></span></label></div>
+    <div class="toggle-row"><div class="toggle-name">蛋白質</div><label class="switch"><input type="checkbox" id="vis-protein" onchange="saveVisibility()"><span class="slider"></span></label></div>
+    <div class="toggle-row"><div class="toggle-name">運動</div><label class="switch"><input type="checkbox" id="vis-exercise" onchange="saveVisibility()"><span class="slider"></span></label></div>
+    <div class="toggle-row"><div class="toggle-name">腿部運動</div><label class="switch"><input type="checkbox" id="vis-leg" onchange="saveVisibility()"><span class="slider"></span></label></div>
+    <div class="toggle-row"><div class="toggle-name">美容儀</div><label class="switch"><input type="checkbox" id="vis-beauty" onchange="saveVisibility()"><span class="slider"></span></label></div>
+    <div class="toggle-row"><div class="toggle-name">靈感隨手記</div><label class="switch"><input type="checkbox" id="vis-ideas" onchange="saveVisibility()"><span class="slider"></span></label></div>
+    <div class="toggle-row"><div class="toggle-name">每週書/影片</div><label class="switch"><input type="checkbox" id="vis-weekread" onchange="saveVisibility()"><span class="slider"></span></label></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">自訂項目</div>
+    <div class="goal-note" style="margin:0 0 10px;">想加什麼新習慣都可以，例如「學英文」。加了之後會出現在「今日」畫面跟「目標」進度，關掉開關就會隱藏，之前的紀錄不會不見。</div>
+    <div id="customItemList"></div>
+    <div class="idea-row" style="margin-top:4px;">
+      <input type="text" class="idea-input" id="customNameInput" placeholder="想新增的項目名稱，例如：學英文" onkeydown="if(event.key==='Enter')addCustomItem()">
+      <button class="idea-add" onclick="addCustomItem()">+</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">資料備份</div>
+    <button class="btn ghost" onclick="exportCSV()">匯出 CSV（可用 Excel 開啟）</button>
+  </div>
+</div>
+
+</div>
+
+<div class="tabbar">
+  <div class="tab active" data-p="today" onclick="switchTab('today')"><span class="tab-ic">📝</span><span class="tab-label">今日</span></div>
+  <div class="tab" data-p="week" onclick="switchTab('week')"><span class="tab-ic">📅</span><span class="tab-label">本週</span></div>
+  <div class="tab" data-p="goals" onclick="switchTab('goals')"><span class="tab-ic">🎯</span><span class="tab-label">目標</span></div>
+  <div class="tab" data-p="settings" onclick="switchTab('settings')"><span class="tab-ic">⚙️</span><span class="tab-label">設定</span></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ helpers ============ */
+function pad(n){return String(n).padStart(2,'0');}
+function fmtDate(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+const TODAY_DATE=new Date();
+const TODAY=fmtDate(TODAY_DATE);
+const YESTERDAY_DATE=new Date(TODAY_DATE);YESTERDAY_DATE.setDate(TODAY_DATE.getDate()-1);
+const YESTERDAY=fmtDate(YESTERDAY_DATE);
+let VIEWING_DATE=TODAY;
+const YEAR=TODAY_DATE.getFullYear();
+const WEEKDAYS=['日','一','二','三','四','五','六'];
+
+function getISOWeekKey(d){
+  const dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  const day=(dt.getUTCDay()+6)%7; // 0=Mon
+  dt.setUTCDate(dt.getUTCDate()-day+3);
+  const firstThu=new Date(Date.UTC(dt.getUTCFullYear(),0,4));
+  const week=1+Math.round(((dt-firstThu)/86400000-3+((firstThu.getUTCDay()+6)%7))/7);
+  return dt.getUTCFullYear()+'-W'+pad(week);
+}
+function getWeekDates(refDate){
+  // Monday-start week containing refDate
+  const d=new Date(refDate);
+  const day=(d.getDay()+6)%7;
+  const monday=new Date(d);monday.setDate(d.getDate()-day);
+  const dates=[];
+  for(let i=0;i<7;i++){const x=new Date(monday);x.setDate(monday.getDate()+i);dates.push(x);}
+  return dates;
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>t.classList.remove('show'),1600);
+}
+function dayKey(dateStr){return 'pdq_day_'+dateStr;}
+function loadDay(dateStr){
+  try{return JSON.parse(localStorage.getItem(dayKey(dateStr)))||{};}catch(e){return {};}
+}
+function storeDay(dateStr,obj){localStorage.setItem(dayKey(dateStr),JSON.stringify(obj));}
+
+function allDayKeysThisYear(){
+  const keys=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k && k.indexOf('pdq_day_'+YEAR)===0) keys.push(k.replace('pdq_day_',''));
+  }
+  return keys.sort();
+}
+
+/* ============ goals ============ */
+const DEFAULT_GOALS={
+  weightTarget:41,
+  monthlyWeight:{'09':43,'10':42,'12':41},
+  daysTarget:100,waterTarget:100,moodTarget:80,proteinTarget:100,
+  exWeeksTarget:10,readWeeksTarget:15,legTarget:100,beautyTarget:120
+};
+function loadGoals(){
+  try{return Object.assign({},DEFAULT_GOALS,JSON.parse(localStorage.getItem('pdq_goals'))||{});}catch(e){return DEFAULT_GOALS;}
+}
+function saveGoals(){
+  const g={
+    weightTarget:parseFloat(document.getElementById('tWeight').value)||DEFAULT_GOALS.weightTarget,
+    monthlyWeight:{
+      '09':parseFloat(document.getElementById('tW9').value)||DEFAULT_GOALS.monthlyWeight['09'],
+      '10':parseFloat(document.getElementById('tW10').value)||DEFAULT_GOALS.monthlyWeight['10'],
+      '12':parseFloat(document.getElementById('tW12').value)||DEFAULT_GOALS.monthlyWeight['12']
+    },
+    daysTarget:parseInt(document.getElementById('tDays').value)||DEFAULT_GOALS.daysTarget,
+    waterTarget:parseInt(document.getElementById('tWater').value)||DEFAULT_GOALS.waterTarget,
+    moodTarget:parseInt(document.getElementById('tMood').value)||DEFAULT_GOALS.moodTarget,
+    proteinTarget:parseInt(document.getElementById('tProtein').value)||DEFAULT_GOALS.proteinTarget,
+    exWeeksTarget:parseInt(document.getElementById('tExWeeks').value)||DEFAULT_GOALS.exWeeksTarget,
+    readWeeksTarget:parseInt(document.getElementById('tReadWeeks').value)||DEFAULT_GOALS.readWeeksTarget,
+    legTarget:parseInt(document.getElementById('tLeg').value)||DEFAULT_GOALS.legTarget,
+    beautyTarget:parseInt(document.getElementById('tBeauty').value)||DEFAULT_GOALS.beautyTarget
+  };
+  localStorage.setItem('pdq_goals',JSON.stringify(g));
+  renderGoals();
+  renderHeader();
+  renderToday();
+}
+function fillGoalInputs(){
+  const g=loadGoals();
+  document.getElementById('tWeight').value=g.weightTarget;
+  document.getElementById('tW9').value=g.monthlyWeight['09'];
+  document.getElementById('tW10').value=g.monthlyWeight['10'];
+  document.getElementById('tW12').value=g.monthlyWeight['12'];
+  document.getElementById('tDays').value=g.daysTarget;
+  document.getElementById('tWater').value=g.waterTarget;
+  document.getElementById('tMood').value=g.moodTarget;
+  document.getElementById('tProtein').value=g.proteinTarget;
+  document.getElementById('tExWeeks').value=g.exWeeksTarget;
+  document.getElementById('tReadWeeks').value=g.readWeeksTarget;
+  document.getElementById('tLeg').value=g.legTarget;
+  document.getElementById('tBeauty').value=g.beautyTarget;
+}
+
+/* ============ item visibility ============ */
+const VIS_KEYS=['weight','water','mood','protein','exercise','leg','beauty','ideas','weekread'];
+const DEFAULT_VIS={weight:true,water:true,mood:true,protein:true,exercise:true,leg:true,beauty:true,ideas:true,weekread:true};
+function loadVisibility(){
+  try{return Object.assign({},DEFAULT_VIS,JSON.parse(localStorage.getItem('pdq_visible')));}catch(e){return Object.assign({},DEFAULT_VIS);}
+}
+function saveVisibility(){
+  const vis={};
+  VIS_KEYS.forEach(k=>{vis[k]=document.getElementById('vis-'+k).checked;});
+  localStorage.setItem('pdq_visible',JSON.stringify(vis));
+  applyVisibility();
+}
+function fillVisibilityInputs(){
+  const vis=loadVisibility();
+  VIS_KEYS.forEach(k=>{document.getElementById('vis-'+k).checked=vis[k];});
+}
+const VIS_CARD_MAP={
+  weight:['card-weight'],
+  water:['card-water'],
+  mood:['card-mood'],
+  protein:['card-protein'],
+  exercise:['card-exercise','card-weekex'],
+  leg:['row-leg'],
+  beauty:['row-beauty'],
+  ideas:['card-ideas'],
+  weekread:['card-weekread']
+};
+const VIS_GOAL_MAP={
+  weight:['goalrow-weight'],
+  water:['goalrow-water'],
+  mood:['goalrow-mood'],
+  protein:['goalrow-protein'],
+  exercise:['goalrow-exercise'],
+  leg:['goalrow-leg'],
+  beauty:['goalrow-beauty'],
+  weekread:['goalrow-weekread']
+};
+function applyVisibility(){
+  const vis=loadVisibility();
+  VIS_KEYS.forEach(k=>{
+    (VIS_CARD_MAP[k]||[]).forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.style.display=vis[k]?'':'none';
+    });
+    (VIS_GOAL_MAP[k]||[]).forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.style.display=vis[k]?'':'none';
+    });
+  });
+}
+
+/* ============ today page state ============ */
+let curMood=null,curProtein=null,curExType='none',curWater=null;
+
+function setMood(v){
+  curMood=v;
+  document.querySelectorAll('#moodSeg .seg-btn').forEach(b=>b.classList.remove('on-good','on-mid','on-bad'));
+  document.querySelector('#moodSeg [data-v="'+v+'"]').classList.add('on-'+v);
+  document.getElementById('moodNote').classList.add('show');
+  saveDay();
+}
+function setWater(v){
+  curWater=v;
+  document.querySelectorAll('#waterSeg .seg-btn').forEach(b=>b.classList.remove('on-good','on-bad'));
+  document.querySelector('#waterSeg [data-v="'+v+'"]').classList.add(v==='yes'?'on-good':'on-bad');
+  saveDay();
+}
+function setProtein(v){
+  curProtein=v;
+  document.querySelectorAll('#proteinSeg .seg-btn').forEach(b=>b.classList.remove('on-good','on-bad'));
+  document.querySelector('#proteinSeg [data-v="'+v+'"]').classList.add(v==='enough'?'on-good':'on-bad');
+  document.getElementById('proteinNote').classList.toggle('show',v==='low');
+  saveDay();
+}
+function setExType(v){
+  curExType=v;
+  document.querySelectorAll('#exSeg .seg-btn').forEach(b=>b.classList.remove('on-teal'));
+  document.querySelector('#exSeg [data-v="'+v+'"]').classList.add('on-teal');
+  document.getElementById('stepsWrap').style.display=(v==='walk')?'flex':'none';
+  saveDay();
+}
+function onStepsChange(){
+  const steps=parseInt(document.getElementById('inSteps').value)||0;
+  const hint=document.getElementById('stepsHint');
+  if(steps>=8000){hint.textContent='已達 8000 步，今天算達成 ✓';hint.classList.add('ok');}
+  else{hint.textContent='達 8000 步才算達成（還差 '+(8000-steps)+' 步）';hint.classList.remove('ok');}
+  saveDay();
+}
+function toggleSimple(field){
+  const dot=document.getElementById('dot'+(field==='leg'?'Leg':'Beauty'));
+  const txt=document.getElementById('txt'+(field==='leg'?'Leg':'Beauty'));
+  const on=!dot.classList.contains('on');
+  dot.classList.toggle('on',on);
+  txt.classList.toggle('done',on);
+  saveDay();
+}
+function exerciseDone(){
+  if(curExType==='other') return true;
+  if(curExType==='walk') return (parseInt(document.getElementById('inSteps').value)||0)>=8000;
+  return false;
+}
+function saveDay(){
+  const existing=loadDay(VIEWING_DATE);
+  const rec={
+    weight:parseFloat(document.getElementById('inWeight').value)||null,
+    water:curWater,
+    waterDone:(curWater==='yes'),
+    mood:curMood,
+    moodNote:document.getElementById('moodNote').value||'',
+    protein:curProtein,
+    proteinNote:document.getElementById('proteinNote').value||'',
+    exerciseType:curExType,
+    steps:parseInt(document.getElementById('inSteps').value)||0,
+    exerciseDone:exerciseDone(),
+    leg:document.getElementById('dotLeg').classList.contains('on'),
+    beauty:document.getElementById('dotBeauty').classList.contains('on'),
+    custom:existing.custom||{},
+    backfilled:(VIEWING_DATE!==TODAY),
+    updatedAt:Date.now()
+  };
+  storeDay(VIEWING_DATE,rec);
+  queueSync('daily',Object.assign({date:VIEWING_DATE},rec));
+  renderHeader();
+  renderGoals();
+}
+function switchDay(which){
+  VIEWING_DATE=(which==='yesterday')?YESTERDAY:TODAY;
+  document.querySelectorAll('.day-switch-btn').forEach(b=>b.classList.toggle('on',b.dataset.d===which));
+  document.getElementById('backfillNote').classList.toggle('show',which==='yesterday');
+  loadTodayIntoForm();
+}
+function loadTodayIntoForm(){
+  const rec=loadDay(VIEWING_DATE);
+  document.getElementById('inWeight').value=rec.weight||'';
+
+  // reset all today-page inputs before applying the viewed day's data
+  curMood=null;curProtein=null;curExType='none';curWater=null;
+  document.querySelectorAll('#moodSeg .seg-btn').forEach(b=>b.classList.remove('on-good','on-mid','on-bad'));
+  document.querySelectorAll('#waterSeg .seg-btn').forEach(b=>b.classList.remove('on-good','on-bad'));
+  document.querySelectorAll('#proteinSeg .seg-btn').forEach(b=>b.classList.remove('on-good','on-bad'));
+  document.querySelectorAll('#exSeg .seg-btn').forEach(b=>b.classList.remove('on-teal'));
+  document.getElementById('moodNote').classList.remove('show');
+  document.getElementById('proteinNote').classList.remove('show');
+  document.getElementById('dotLeg').classList.remove('on');
+  document.getElementById('txtLeg').classList.remove('done');
+  document.getElementById('dotBeauty').classList.remove('on');
+  document.getElementById('txtBeauty').classList.remove('done');
+
+  curMood=rec.mood||null;
+  curProtein=rec.protein||null;
+  curExType=rec.exerciseType||'none';
+  curWater=rec.water||null;
+  document.getElementById('moodNote').value=rec.moodNote||'';
+  document.getElementById('proteinNote').value=rec.proteinNote||'';
+  document.getElementById('inSteps').value=rec.steps||'';
+  if(curMood) setMood(curMood);
+  if(curProtein) setProtein(curProtein);
+  if(curWater) setWater(curWater);
+  setExType(curExType);
+  if(rec.leg){document.getElementById('dotLeg').classList.add('on');document.getElementById('txtLeg').classList.add('done');}
+  if(rec.beauty){document.getElementById('dotBeauty').classList.add('on');document.getElementById('txtBeauty').classList.add('done');}
+  if(curExType==='walk') onStepsChange();
+  renderCustomTodayCard();
+}
+function renderWeightGap(){
+  const g=loadGoals();
+  const w=parseFloat(document.getElementById('inWeight').value);
+  const el=document.getElementById('weightGap');
+  if(!w){el.textContent='目標 '+g.weightTarget+' kg';return;}
+  const diff=(w-g.weightTarget).toFixed(1);
+  if(diff<=0){el.textContent='已達目標 🎉';}
+  else{el.textContent='距離 '+g.weightTarget+'kg 目標還差 '+diff+'kg';}
+}
+document.getElementById('inWeight').addEventListener('input',()=>{renderWeightGap();saveDay();});
+
+/* ============ ideas ============ */
+function loadIdeas(){try{return JSON.parse(localStorage.getItem('pdq_ideas'))||[];}catch(e){return [];}}
+function saveIdeas(arr){localStorage.setItem('pdq_ideas',JSON.stringify(arr));}
+function addIdea(){
+  const input=document.getElementById('ideaInput');
+  const text=input.value.trim();
+  if(!text) return;
+  const arr=loadIdeas();
+  const item={id:Date.now(),ts:new Date().toISOString(),text};
+  arr.unshift(item);
+  saveIdeas(arr);
+  queueSync('idea',item);
+  input.value='';
+  renderIdeas();
+}
+function delIdea(id){
+  saveIdeas(loadIdeas().filter(i=>i.id!==id));
+  renderIdeas();
+}
+function renderIdeas(){
+  const arr=loadIdeas();
+  const wrap=document.getElementById('ideaList');
+  if(!arr.length){wrap.innerHTML='<div class="idea-empty">還沒有靈感紀錄</div>';return;}
+  wrap.innerHTML=arr.slice(0,20).map(i=>{
+    const d=new Date(i.ts);
+    return '<div class="idea-item"><span>'+escapeHtml(i.text)+'<br><span style="color:var(--text3);font-size:11px;">'+pad(d.getMonth()+1)+'/'+pad(d.getDate())+'</span></span><span class="idea-del" onclick="delIdea('+i.id+')">✕</span></div>';
+  }).join('');
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+/* ============ custom items ============ */
+function loadCustom(){try{return JSON.parse(localStorage.getItem('pdq_custom'))||[];}catch(e){return [];}}
+function saveCustom(arr){localStorage.setItem('pdq_custom',JSON.stringify(arr));}
+function addCustomItem(){
+  const input=document.getElementById('customNameInput');
+  const name=input.value.trim();
+  if(!name) return;
+  const arr=loadCustom();
+  arr.push({id:'c'+Date.now(),name,active:true,target:100});
+  saveCustom(arr);
+  input.value='';
+  renderCustomSettingsList();
+  renderCustomTodayCard();
+  renderCustomGoals();
+}
+function toggleCustomActive(id){
+  const arr=loadCustom();
+  const it=arr.find(i=>i.id===id);
+  if(it) it.active=!it.active;
+  saveCustom(arr);
+  renderCustomSettingsList();
+  renderCustomTodayCard();
+  renderCustomGoals();
+}
+function updateCustomTarget(id,val){
+  const arr=loadCustom();
+  const it=arr.find(i=>i.id===id);
+  if(it) it.target=parseInt(val)||100;
+  saveCustom(arr);
+  renderCustomGoals();
+}
+let pendingDeleteId=null;
+function deleteCustomItem(id){
+  if(pendingDeleteId===id){
+    saveCustom(loadCustom().filter(i=>i.id!==id));
+    pendingDeleteId=null;
+    renderCustomSettingsList();
+    renderCustomTodayCard();
+    renderCustomGoals();
+  }else{
+    pendingDeleteId=id;
+    renderCustomSettingsList();
+    clearTimeout(window._delTimer);
+    window._delTimer=setTimeout(()=>{
+      if(pendingDeleteId===id){pendingDeleteId=null;renderCustomSettingsList();}
+    },3000);
+  }
+}
+function renderCustomSettingsList(){
+  const arr=loadCustom();
+  const wrap=document.getElementById('customItemList');
+  if(!wrap) return;
+  if(!arr.length){wrap.innerHTML='<div class="idea-empty">還沒有自訂項目</div>';return;}
+  wrap.innerHTML=arr.map(it=>{
+    const pending=pendingDeleteId===it.id;
+    return '<div class="custom-item-row">'
+      +'<div class="custom-item-name">'+escapeHtml(it.name)+'</div>'
+      +'<span class="custom-item-target-label">目標</span>'
+      +'<input type="number" class="custom-item-target" value="'+it.target+'" onchange="updateCustomTarget(\''+it.id+'\',this.value)">'
+      +'<span class="custom-item-target-label">天</span>'
+      +'<label class="switch"><input type="checkbox" '+(it.active?'checked':'')+' onchange="toggleCustomActive(\''+it.id+'\')"><span class="slider"></span></label>'
+      +'<span class="custom-item-del" style="'+(pending?'color:var(--coral);font-weight:700;font-size:11px;white-space:nowrap;':'')+'" onclick="deleteCustomItem(\''+it.id+'\')">'+(pending?'確定？':'✕')+'</span>'
+      +'</div>';
+  }).join('');
+}
+function renderCustomTodayCard(){
+  const arr=loadCustom().filter(i=>i.active);
+  const card=document.getElementById('card-custom');
+  const wrap=document.getElementById('customTodayList');
+  if(!arr.length){card.style.display='none';return;}
+  card.style.display='';
+  const rec=loadDay(VIEWING_DATE);
+  const custom=rec.custom||{};
+  wrap.innerHTML=arr.map(it=>{
+    const on=!!custom[it.id];
+    return '<div class="check-row"><div class="dot'+(on?' on':'')+'" onclick="toggleCustomToday(\''+it.id+'\')">✓</div><div class="check-text'+(on?' done':'')+'">'+escapeHtml(it.name)+'</div></div>';
+  }).join('');
+}
+function toggleCustomToday(id){
+  const rec=loadDay(VIEWING_DATE);
+  rec.custom=rec.custom||{};
+  rec.custom[id]=!rec.custom[id];
+  storeDay(VIEWING_DATE,rec);
+  const item=loadCustom().find(i=>i.id===id);
+  queueSync('custom',{date:VIEWING_DATE,itemId:id,itemName:item?item.name:'',done:rec.custom[id]});
+  renderCustomTodayCard();
+  renderCustomGoals();
+}
+function renderCustomGoals(){
+  const arr=loadCustom().filter(i=>i.active);
+  const card=document.getElementById('card-customgoals');
+  const wrap=document.getElementById('customGoalsList');
+  if(!arr.length){card.style.display='none';return;}
+  card.style.display='';
+  const days=allDayKeysThisYear();
+  wrap.innerHTML=arr.map(it=>{
+    let cur=0;
+    days.forEach(d=>{const rec=loadDay(d);if(rec.custom&&rec.custom[it.id]) cur++;});
+    const pct=Math.min(100,Math.round(cur/it.target*100));
+    return '<div class="goal-item">'
+      +'<div class="goal-top"><div class="goal-name">'+escapeHtml(it.name)+'</div><div class="goal-val"><b>'+cur+'</b> / '+it.target+'</div></div>'
+      +'<div class="goal-bar-bg"><div class="goal-bar" style="width:'+pct+'%"></div></div>'
+      +'</div>';
+  }).join('');
+}
+
+/* ============ weekly ============ */
+function weekKey(refDate){return 'pdq_week_'+getISOWeekKey(refDate);}
+function loadWeek(refDate){try{return Object.assign({titles:['','',''],done:[false,false,false],reflection:''},JSON.parse(localStorage.getItem(weekKey(refDate))));}catch(e){return {titles:['','',''],done:[false,false,false],reflection:''};}}
+function storeWeek(refDate,obj){localStorage.setItem(weekKey(refDate),JSON.stringify(obj));}
+function saveWeekReflection(){
+  const w=loadWeek(TODAY_DATE);
+  w.reflection=document.getElementById('weekReflection').value;
+  storeWeek(TODAY_DATE,w);
+  queueSync('weekly',{week:getISOWeekKey(TODAY_DATE),titles:w.titles,done:w.done,reflection:w.reflection});
+}
+
+function renderWeekPage(){
+  const dates=getWeekDates(TODAY_DATE);
+  const rangeText=(dates[0].getMonth()+1)+'/'+dates[0].getDate()+' - '+(dates[6].getMonth()+1)+'/'+dates[6].getDate();
+  document.getElementById('weekExRange').textContent=rangeText;
+  document.getElementById('weekRange').textContent=rangeText;
+
+  let exCount=0;
+  dates.forEach(d=>{
+    const rec=loadDay(fmtDate(d));
+    if(rec.exerciseDone) exCount++;
+  });
+  document.getElementById('weekExNum').textContent=exCount;
+  document.getElementById('weekExBar').style.width=Math.min(100,Math.round(exCount/3*100))+'%';
+
+  const w=loadWeek(TODAY_DATE);
+  const wrap=document.getElementById('weekReadList');
+  wrap.innerHTML=[0,1,2].map(i=>{
+    return '<div class="week-item"><div class="dot'+(w.done[i]?' on':'')+'" onclick="toggleWeekItem('+i+')">✓</div><input class="week-title" placeholder="第 '+(i+1)+' 項：書名／影片名" value="'+escapeHtml(w.titles[i]||'')+'" oninput="setWeekTitle('+i+',this.value)"></div>';
+  }).join('');
+  document.getElementById('weekReflection').value=w.reflection||'';
+}
+function toggleWeekItem(i){
+  const w=loadWeek(TODAY_DATE);
+  w.done[i]=!w.done[i];
+  storeWeek(TODAY_DATE,w);
+  queueSync('weekly',{week:getISOWeekKey(TODAY_DATE),titles:w.titles,done:w.done,reflection:w.reflection});
+  renderWeekPage();
+  renderGoals();
+}
+function setWeekTitle(i,val){
+  const w=loadWeek(TODAY_DATE);
+  w.titles[i]=val;
+  storeWeek(TODAY_DATE,w);
+  queueSync('weekly',{week:getISOWeekKey(TODAY_DATE),titles:w.titles,done:w.done,reflection:w.reflection});
+}
+
+/* ============ header ============ */
+function renderHeader(){
+  const now=TODAY_DATE;
+  document.getElementById('hdrDate').textContent=YEAR+'/'+pad(now.getMonth()+1)+'/'+pad(now.getDate())+'（'+WEEKDAYS[now.getDay()]+'）';
+  const days=allDayKeysThisYear();
+  document.getElementById('hdrSub').textContent='今日快速記錄';
+  document.getElementById('hdrNum').textContent=pad(days.length).length<3?String(days.length).padStart(3,'0'):String(days.length);
+}
+
+/* ============ goals render ============ */
+function renderGoals(){
+  const g=loadGoals();
+  const days=allDayKeysThisYear();
+  let moodDays=0,proteinDays=0,legDays=0,beautyDays=0,waterDays=0;
+  const weekExMap={},weekReadMap={};
+
+  days.forEach(dateStr=>{
+    const rec=loadDay(dateStr);
+    if(rec.mood && rec.mood!=='bad') moodDays++;
+    if(rec.protein==='enough') proteinDays++;
+    if(rec.leg) legDays++;
+    if(rec.beauty) beautyDays++;
+    if(rec.waterDone) waterDays++;
+    if(rec.exerciseDone){
+      const wk=getISOWeekKey(new Date(dateStr));
+      weekExMap[wk]=(weekExMap[wk]||0)+1;
+    }
+  });
+  const exWeeksAchieved=Object.values(weekExMap).filter(c=>c>=3).length;
+
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k && k.indexOf('pdq_week_'+YEAR)===0){
+      try{
+        const w=JSON.parse(localStorage.getItem(k));
+        if(w.done && w.done[0]&&w.done[1]&&w.done[2]) weekReadMap[k]=true;
+      }catch(e){}
+    }
+  }
+  const readWeeksAchieved=Object.keys(weekReadMap).length;
+
+  setBar('gDays',days.length,g.daysTarget);
+  setBar('gWater',waterDays,g.waterTarget);
+  setBar('gMood',moodDays,g.moodTarget);
+  setBar('gPro',proteinDays,g.proteinTarget);
+  setBar('gEx',exWeeksAchieved,g.exWeeksTarget);
+  setBar('gRead',readWeeksAchieved,g.readWeeksTarget);
+  setBar('gLeg',legDays,g.legTarget);
+  setBar('gBeauty',beautyDays,g.beautyTarget);
+  document.getElementById('gWeightFinal').textContent=g.weightTarget;
+
+  // monthly weight checkpoint table
+  const monthNames={'09':'9月','10':'10月','12':'12月'};
+  let rows='';
+  Object.keys(g.monthlyWeight).sort().forEach(mm=>{
+    const target=g.monthlyWeight[mm];
+    let actual=null;
+    days.forEach(d=>{
+      if(d.substring(5,7)===mm){
+        const rec=loadDay(d);
+        if(rec.weight) actual=rec.weight;
+      }
+    });
+    const hit=actual!==null && actual<=target;
+    rows+='<tr><td>'+monthNames[mm]+'</td><td>目標 '+target+'kg</td><td class="'+(hit?'hit':'')+'">'+(actual!==null?('目前 '+actual+'kg'+(hit?' ✓':'')):'尚無紀錄')+'</td></tr>';
+  });
+  document.getElementById('monthTable').innerHTML=rows;
+
+  // history
+  const hist=days.slice(-14).reverse();
+  document.getElementById('histList').innerHTML=hist.map(d=>{
+    const rec=loadDay(d);
+    const icons=(rec.mood==='good'?'🙂':rec.mood==='mid'?'😐':rec.mood==='bad'?'😔':'·')+
+      (rec.waterDone?'💧':'')+
+      (rec.protein==='enough'?'🥩':'')+
+      (rec.exerciseDone?'🏃':'')+
+      (rec.leg?'🦵':'')+
+      (rec.beauty?'✨':'')+
+      (rec.backfilled?' <span style="font-size:10px;color:var(--text3);">補</span>':'');
+    const dd=new Date(d);
+    return '<div class="hist-item"><div class="hist-date">'+(dd.getMonth()+1)+'/'+dd.getDate()+'</div><div class="hist-icons">'+icons+'</div><div class="hist-w">'+(rec.weight?rec.weight+'kg':'')+'</div></div>';
+  }).join('') || '<div class="idea-empty">還沒有紀錄</div>';
+}
+function setBar(prefix,cur,target){
+  document.getElementById(prefix+'Cur').textContent=cur;
+  document.getElementById(prefix+'Target').textContent=target;
+  document.getElementById(prefix+'Bar').style.width=Math.min(100,Math.round(cur/target*100))+'%';
+}
+
+/* ============ tabs ============ */
+function switchTab(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelector('.tab[data-p="'+p+'"]').classList.add('active');
+  if(p==='week') renderWeekPage();
+  if(p==='goals'){renderGoals();renderCustomGoals();}
+  if(p==='settings'){fillGoalInputs();fillVisibilityInputs();renderCustomSettingsList();}
+}
+function renderToday(){renderWeightGap();}
+
+/* ============ Google Sheets sync ============ */
+function getSheetUrl(){return localStorage.getItem('pdq_sheeturl')||'';}
+function saveSheetUrl(){
+  localStorage.setItem('pdq_sheeturl',document.getElementById('inSheetUrl').value.trim());
+  document.getElementById('syncStatus').textContent='網址已儲存，尚未測試';
+}
+function loadQueue(){try{return JSON.parse(localStorage.getItem('pdq_queue'))||[];}catch(e){return [];}}
+function saveQueue(q){localStorage.setItem('pdq_queue',JSON.stringify(q));updateQueueStatus();}
+function updateQueueStatus(){
+  const n=loadQueue().length;
+  document.getElementById('queueStatus').textContent=n?('待同步 '+n+' 筆'):'';
+}
+function queueSync(type,data){
+  const q=loadQueue();
+  let idx=-1;
+  if(type==='daily') idx=q.findIndex(item=>item.type==='daily' && item.data.date===data.date);
+  else if(type==='weekly') idx=q.findIndex(item=>item.type==='weekly' && item.data.week===data.week);
+  else if(type==='custom') idx=q.findIndex(item=>item.type==='custom' && item.data.date===data.date && item.data.itemId===data.itemId);
+  if(idx>=0){
+    q[idx]={id:q[idx].id,type,data};
+  }else{
+    q.push({id:Date.now()+Math.random(),type,data});
+  }
+  saveQueue(q);
+  clearTimeout(window._syncTimer);
+  window._syncTimer=setTimeout(()=>flushQueue(false),900);
+}
+async function flushQueue(manual){
+  const url=getSheetUrl();
+  const q=loadQueue();
+  if(!url){ if(manual) toast('請先在設定填入試算表網址'); return; }
+  if(!q.length){ if(manual) toast('沒有待同步的資料'); return; }
+  const remain=[];
+  let okCount=0;
+  for(const item of q){
+    try{
+      await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify({type:item.type,data:item.data})
+      });
+      okCount++;
+    }catch(e){
+      remain.push(item);
+    }
+  }
+  saveQueue(remain);
+  if(okCount>0){
+    document.getElementById('syncStatus').innerHTML='<span class="status-ok">最後同步成功 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})+'</span>';
+  }
+  if(manual){
+    if(remain.length===0) toast('同步完成');
+    else toast('部分同步失敗，稍後會自動重試');
+  }
+}
+async function testConnection(){
+  const url=getSheetUrl();
+  if(!url){toast('請先填入網址');return;}
+  document.getElementById('syncStatus').textContent='連線測試中...';
+  try{
+    const res=await fetch(url,{method:'GET'});
+    const text=await res.text();
+    document.getElementById('syncStatus').innerHTML='<span class="status-ok">連線成功 ✓</span>';
+    toast('連線成功！');
+  }catch(e){
+    document.getElementById('syncStatus').innerHTML='<span class="status-bad">連線失敗，請確認網址或部署權限</span>';
+    toast('連線失敗');
+  }
+}
+
+/* ============ CSV export ============ */
+function exportCSV(){
+  const days=allDayKeysThisYear();
+  const headers=['日期','體重','喝水','心情','心情筆記','蛋白質','蛋白質筆記','運動類型','步數','運動達成','腿部運動','美容儀','補記'];
+  const rows=[headers.join(',')];
+  days.forEach(d=>{
+    const r=loadDay(d);
+    rows.push([d,r.weight||'',r.water||'',r.mood||'',csvEsc(r.moodNote),r.protein||'',csvEsc(r.proteinNote),r.exerciseType||'',r.steps||'',r.exerciseDone?'V':'',r.leg?'V':'',r.beauty?'V':'',r.backfilled?'V':''].join(','));
+  });
+  const blob=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);
+  link.download='2026記錄_'+TODAY+'.csv';
+  link.click();
+}
+function csvEsc(s){if(!s)return '';return '"'+String(s).replace(/"/g,'""')+'"';}
+
+/* ============ init ============ */
+function init(){
+  const g=loadGoals();
+  document.getElementById('gDaysTarget').textContent=g.daysTarget;
+  document.getElementById('gWaterTarget').textContent=g.waterTarget;
+  document.getElementById('gMoodTarget').textContent=g.moodTarget;
+  document.getElementById('gProTarget').textContent=g.proteinTarget;
+  document.getElementById('gExTarget').textContent=g.exWeeksTarget;
+  document.getElementById('gReadTarget').textContent=g.readWeeksTarget;
+  document.getElementById('gLegTarget').textContent=g.legTarget;
+  document.getElementById('gBeautyTarget').textContent=g.beautyTarget;
+  document.getElementById('inSheetUrl').value=getSheetUrl();
+  applyVisibility();
+  loadTodayIntoForm();
+  renderHeader();
+  renderIdeas();
+  renderGoals();
+  renderCustomGoals();
+  renderToday();
+  updateQueueStatus();
+  flushQueue(false);
+}
+init();
+</script>
+</body>
+</html>
